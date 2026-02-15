@@ -66,10 +66,15 @@
             font-size: 0.9em;
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: var(--court-orange);
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(230, 126, 34, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -81,6 +86,10 @@
         .btn-secondary:hover {
             background: var(--court-dark);
             color: white;
+        }
+
+        .btn-undo {
+            background: var(--court-orange);
         }
 
         .scoresheet {
@@ -199,11 +208,6 @@
             font-weight: 700;
         }
 
-        .roster-table {
-            width: 100%;
-            margin-top: 15px;
-        }
-
         .roster-header {
             display: grid;
             grid-template-columns: 50px 150px 200px 1fr;
@@ -249,6 +253,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
+            font-size: 0.7em;
             color: var(--danger);
         }
 
@@ -272,6 +277,7 @@
         .score-controls {
             display: flex;
             gap: 4px;
+            align-items: center;
         }
 
         .score-btn {
@@ -380,7 +386,6 @@
             border-bottom: 1px solid var(--border);
         }
 
-        /* Settings Modal */
         .modal {
             display: none;
             position: fixed;
@@ -498,7 +503,19 @@
     </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <button class="btn btn-undo" onclick="undoLastAction()" id="undoBtn" disabled>↶ Undo</button>
+            <button class="btn" onclick="openSettings()">⚙️ Settings</button>
+            <button class="btn" onclick="openScoreboard()">📺 Scoreboard</button>
+            <button class="btn" onclick="saveGame()">💾 Save</button>
+            <button class="btn-secondary btn" onclick="loadGame()">📂 Load</button>
+            <button class="btn" onclick="exportPDF()">📄 Export PDF</button>
+            <button class="btn-secondary btn" onclick="resetGame()">🔄 New Game</button>
+        </div>
 
+        <!-- Scoresheet -->
         <div class="scoresheet" id="scoresheet">
             <div class="scoresheet-header">
                 <h1>🏀 OFFICIAL SCORESHEET</h1>
@@ -531,9 +548,7 @@
                 <div class="team-section team-a">
                     <div class="team-header-row">
                         <div style="display: flex; gap: 15px; align-items: center;">
-                            <div id="teamALogoContainer" class="logo-placeholder" onclick="uploadLogo('A')">
-                                +
-                            </div>
+                            <div id="teamALogoContainer" class="logo-placeholder" onclick="uploadLogo('A')">+</div>
                             <input type="text" id="teamAName" class="team-name-input" placeholder="Team A Name">
                         </div>
                         <div class="team-score-display" id="teamAScore">0</div>
@@ -553,9 +568,7 @@
                 <div class="team-section team-b">
                     <div class="team-header-row">
                         <div style="display: flex; gap: 15px; align-items: center;">
-                            <div id="teamBLogoContainer" class="logo-placeholder" onclick="uploadLogo('B')">
-                                +
-                            </div>
+                            <div id="teamBLogoContainer" class="logo-placeholder" onclick="uploadLogo('B')">+</div>
                             <input type="text" id="teamBName" class="team-name-input" placeholder="Team B Name">
                         </div>
                         <div class="team-score-display" id="teamBScore">0</div>
@@ -574,7 +587,26 @@
 
             <!-- Timer & Stats -->
             <div class="timer-section">
-
+                <div class="timer-display">
+                    <div style="opacity: 0.7; margin-bottom: 5px;">GAME CLOCK</div>
+                    <div class="timer-time" id="timerDisplay">10:00</div>
+                    <div class="timer-controls">
+                        <button class="btn" style="flex: 1;" id="startTimer">Start</button>
+                        <button class="btn" style="flex: 1;" id="pauseTimer">Pause</button>
+                        <button class="btn" style="flex: 1;" id="resetTimer">Reset</button>
+                    </div>
+                    <div style="margin-top: 10px; text-align: center;">
+                        <label style="font-size: 0.85em; opacity: 0.8;">Quarter Length (min):</label>
+                        <input type="number" id="quarterLength" value="10" min="1" max="20" 
+                               style="width: 60px; padding: 5px; margin-left: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; text-align: center;">
+                    </div>
+                    <div class="quarter-selector">
+                        <button class="quarter-btn active" data-quarter="1">Q1</button>
+                        <button class="quarter-btn" data-quarter="2">Q2</button>
+                        <button class="quarter-btn" data-quarter="3">Q3</button>
+                        <button class="quarter-btn" data-quarter="4">Q4</button>
+                    </div>
+                </div>
 
                 <div class="stats-display">
                     <h3 style="margin-bottom: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5em;">Game Stats</h3>
@@ -683,14 +715,20 @@
             timer: {
                 minutes: 10,
                 seconds: 0,
+                quarterLength: 10,
                 isRunning: false,
                 interval: null
             }
+        };
 
+        // Undo system
+        const undoHistory = [];
+        const MAX_UNDO_HISTORY = 20;
+        let currentLogoUpload = null;
+        let scoreboardWindow = null;
 
         // Initialize
         function init() {
-            // Initialize 12 players per team
             for (let i = 0; i < 12; i++) {
                 gameState.teamA.players.push({ number: '', name: '', fouls: 0, points: 0 });
                 gameState.teamB.players.push({ number: '', name: '', fouls: 0, points: 0 });
@@ -698,14 +736,8 @@
 
             renderRoster('teamA');
             renderRoster('teamB');
-            
-            // Set today's date
             document.getElementById('gameDate').valueAsDate = new Date();
-            
-            // Load saved game if exists
             loadFromLocalStorage();
-            
-            // Setup event listeners
             setupEventListeners();
         }
 
@@ -748,9 +780,63 @@
             saveToLocalStorage();
         }
 
+        function toggleFoul(team, playerIndex, foulNumber) {
+            const teamData = team === 'teamA' ? gameState.teamA : gameState.teamB;
+            const player = teamData.players[playerIndex];
+            const oldFouls = player.fouls;
+            const oldTeamFouls = teamData.totalFouls;
+            
+            if (foulNumber === player.fouls) {
+                player.fouls--;
+                teamData.totalFouls--;
+            } else if (foulNumber === player.fouls + 1) {
+                player.fouls++;
+                teamData.totalFouls++;
+                
+                if (player.fouls === 5) {
+                    showMessage(`Player #${player.number || playerIndex + 1} fouled out!`);
+                }
+            } else {
+                player.fouls = foulNumber;
+                teamData.totalFouls += (foulNumber - oldFouls);
+            }
+            
+            addToUndoHistory({
+                type: 'foul',
+                team: team,
+                playerIndex: playerIndex,
+                oldFouls: oldFouls,
+                newFouls: player.fouls,
+                oldTeamFouls: oldTeamFouls,
+                newTeamFouls: teamData.totalFouls
+            });
+            
+            renderRoster(team);
+            updateStats();
+            saveToLocalStorage();
+        }
 
-
-
+        function addPoints(team, playerIndex, points) {
+            const teamData = team === 'teamA' ? gameState.teamA : gameState.teamB;
+            const oldPlayerPoints = teamData.players[playerIndex].points;
+            const oldTeamScore = teamData.score;
+            
+            teamData.players[playerIndex].points += points;
+            teamData.score += points;
+            
+            addToUndoHistory({
+                type: 'points',
+                team: team,
+                playerIndex: playerIndex,
+                points: points,
+                oldPlayerPoints: oldPlayerPoints,
+                oldTeamScore: oldTeamScore
+            });
+            
+            renderRoster(team);
+            updateScoreDisplay();
+            saveToLocalStorage();
+        }
 
         function updateScoreDisplay() {
             document.getElementById('teamAScore').textContent = gameState.teamA.score;
@@ -764,12 +850,10 @@
         }
 
         function setupEventListeners() {
-            // Timer
             document.getElementById('startTimer').addEventListener('click', startTimer);
             document.getElementById('pauseTimer').addEventListener('click', pauseTimer);
             document.getElementById('resetTimer').addEventListener('click', resetTimer);
             
-            // Quarter buttons
             document.querySelectorAll('.quarter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.quarter-btn').forEach(b => b.classList.remove('active'));
@@ -780,7 +864,6 @@
                 });
             });
             
-            // Quarter scores
             ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
                 ['TeamA', 'TeamB'].forEach(team => {
                     document.getElementById(quarter + team).addEventListener('input', function() {
@@ -793,7 +876,6 @@
                 });
             });
             
-            // Team names
             document.getElementById('teamAName').addEventListener('input', function() {
                 gameState.teamA.name = this.value;
                 document.getElementById('teamANameLabel').textContent = this.value || 'Team A';
@@ -806,17 +888,35 @@
                 saveToLocalStorage();
             });
             
+            ['competition', 'gameDate', 'gameTime', 'venue'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function() {
+                    const field = id === 'gameDate' ? 'date' : id === 'gameTime' ? 'time' : id === 'venue' ? 'venue' : 'competition';
+                    gameState.gameInfo[field] = this.value;
+                    saveToLocalStorage();
+                });
+            });
 
+            document.getElementById('quarterLength').addEventListener('change', function() {
+                const newLength = parseInt(this.value) || 10;
+                gameState.timer.quarterLength = newLength;
+                if (!gameState.timer.isRunning) {
+                    gameState.timer.minutes = newLength;
+                    gameState.timer.seconds = 0;
+                    updateTimerDisplay();
+                }
+                saveToLocalStorage();
+            });
+
+            document.getElementById('logoUploader').addEventListener('change', handleLogoUpload);
+        }
 
         function updateQuarterTotals() {
             const totalA = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamA, 0);
             const totalB = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamB, 0);
-            
             document.getElementById('totalTeamA').value = totalA;
             document.getElementById('totalTeamB').value = totalB;
         }
 
-        // Timer functions
         function updateTimerDisplay() {
             const mins = String(gameState.timer.minutes).padStart(2, '0');
             const secs = String(gameState.timer.seconds).padStart(2, '0');
@@ -849,9 +949,15 @@
             clearInterval(gameState.timer.interval);
         }
 
+        function resetTimer() {
+            pauseTimer();
+            const quarterLength = parseInt(document.getElementById('quarterLength').value) || 10;
+            gameState.timer.minutes = quarterLength;
+            gameState.timer.seconds = 0;
+            updateTimerDisplay();
+            saveToLocalStorage();
+        }
 
-
-        // Logo upload
         function uploadLogo(team) {
             currentLogoUpload = team;
             document.getElementById('logoUploader').click();
@@ -864,7 +970,6 @@
                 reader.onload = function(event) {
                     const teamKey = currentLogoUpload === 'A' ? 'teamA' : 'teamB';
                     gameState[teamKey].logo = event.target.result;
-                    
                     const container = document.getElementById(`team${currentLogoUpload}LogoContainer`);
                     container.innerHTML = `<img src="${event.target.result}" class="team-logo">`;
                     saveToLocalStorage();
@@ -873,7 +978,6 @@
             }
         }
 
-        // Settings
         function openSettings() {
             document.getElementById('teamAColorPicker').value = gameState.teamA.color;
             document.getElementById('teamBColorPicker').value = gameState.teamB.color;
@@ -887,16 +991,95 @@
         function applySettings() {
             gameState.teamA.color = document.getElementById('teamAColorPicker').value;
             gameState.teamB.color = document.getElementById('teamBColorPicker').value;
-            
             document.documentElement.style.setProperty('--team-a-color', gameState.teamA.color);
             document.documentElement.style.setProperty('--team-b-color', gameState.teamB.color);
-            
             closeSettings();
             saveToLocalStorage();
             showMessage('Settings applied!');
         }
 
+        function openScoreboard() {
+            if (scoreboardWindow && !scoreboardWindow.closed) {
+                scoreboardWindow.focus();
+                return;
+            }
+            
+            scoreboardWindow = window.open('scoreboard.html', 'Scoreboard', 
+                'width=1400,height=800,menubar=no,toolbar=no,location=no,status=no');
+            
+            if (!scoreboardWindow) {
+                alert('Please allow pop-ups to show the scoreboard display');
+                return;
+            }
+            
+            setTimeout(() => {
+                if (scoreboardWindow && !scoreboardWindow.closed) {
+                    scoreboardWindow.postMessage({
+                        type: 'scoreboardUpdate',
+                        gameState: gameState
+                    }, '*');
+                }
+            }, 500);
+            
+            showMessage('Scoreboard opened! Press F for fullscreen, P to toggle possession');
+        }
 
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'requestScoreboardData') {
+                if (scoreboardWindow && !scoreboardWindow.closed) {
+                    scoreboardWindow.postMessage({
+                        type: 'scoreboardUpdate',
+                        gameState: gameState
+                    }, '*');
+                }
+            }
+        });
+
+        function addToUndoHistory(action) {
+            undoHistory.push(action);
+            if (undoHistory.length > MAX_UNDO_HISTORY) {
+                undoHistory.shift();
+            }
+            document.getElementById('undoBtn').disabled = false;
+        }
+
+        function undoLastAction() {
+            if (undoHistory.length === 0) return;
+            
+            const action = undoHistory.pop();
+            
+            if (action.type === 'points') {
+                const teamData = action.team === 'teamA' ? gameState.teamA : gameState.teamB;
+                teamData.players[action.playerIndex].points = action.oldPlayerPoints;
+                teamData.score = action.oldTeamScore;
+                renderRoster(action.team);
+                updateScoreDisplay();
+                showMessage(`Undone: ${action.points} point${action.points > 1 ? 's' : ''} removed`);
+            } else if (action.type === 'foul') {
+                const teamData = action.team === 'teamA' ? gameState.teamA : gameState.teamB;
+                teamData.players[action.playerIndex].fouls = action.oldFouls;
+                teamData.totalFouls = action.oldTeamFouls;
+                renderRoster(action.team);
+                updateStats();
+                showMessage('Undone: Foul reverted');
+            }
+            
+            if (undoHistory.length === 0) {
+                document.getElementById('undoBtn').disabled = true;
+            }
+            
+            saveToLocalStorage();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('basketballGame', JSON.stringify(gameState));
+            if (scoreboardWindow && !scoreboardWindow.closed) {
+                scoreboardWindow.postMessage({
+                    type: 'scoreboardUpdate',
+                    gameState: gameState
+                }, '*');
+            }
+        }
 
         function loadFromLocalStorage() {
             const saved = localStorage.getItem('basketballGame');
@@ -904,7 +1087,6 @@
                 const data = JSON.parse(saved);
                 Object.assign(gameState, data);
                 
-                // Restore UI
                 document.getElementById('competition').value = gameState.gameInfo.competition;
                 document.getElementById('gameDate').value = gameState.gameInfo.date;
                 document.getElementById('gameTime').value = gameState.gameInfo.time;
@@ -912,11 +1094,9 @@
                 document.getElementById('teamAName').value = gameState.teamA.name;
                 document.getElementById('teamBName').value = gameState.teamB.name;
                 
-                // Restore colors
                 document.documentElement.style.setProperty('--team-a-color', gameState.teamA.color);
                 document.documentElement.style.setProperty('--team-b-color', gameState.teamB.color);
                 
-                // Restore logos
                 if (gameState.teamA.logo) {
                     document.getElementById('teamALogoContainer').innerHTML = 
                         `<img src="${gameState.teamA.logo}" class="team-logo">`;
@@ -926,7 +1106,23 @@
                         `<img src="${gameState.teamB.logo}" class="team-logo">`;
                 }
                 
-
+                ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
+                    document.getElementById(quarter + 'TeamA').value = gameState.quarters[quarter].teamA;
+                    document.getElementById(quarter + 'TeamB').value = gameState.quarters[quarter].teamB;
+                });
+                
+                if (gameState.timer.quarterLength) {
+                    document.getElementById('quarterLength').value = gameState.timer.quarterLength;
+                }
+                
+                renderRoster('teamA');
+                renderRoster('teamB');
+                updateScoreDisplay();
+                updateStats();
+                updateTimerDisplay();
+                updateQuarterTotals();
+            }
+        }
 
         function saveGame() {
             const dataStr = JSON.stringify(gameState, null, 2);
@@ -970,7 +1166,6 @@
 
         async function exportPDF() {
             showMessage('Generating PDF... Please wait...');
-            
             try {
                 const element = document.getElementById('scoresheet');
                 const canvas = await html2canvas(element, {
@@ -982,31 +1177,32 @@
                 const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                
-                const imgWidth = 210; // A4 width in mm
+                const imgWidth = 210;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
                 pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
                 pdf.save(`scoresheet_${gameState.gameInfo.date || 'game'}.pdf`);
-                
                 showMessage('PDF exported successfully!');
             } catch (error) {
                 alert('Error exporting PDF: ' + error.message);
             }
         }
 
-
+        function showMessage(text) {
             const msg = document.createElement('div');
             msg.className = 'success-message';
             msg.textContent = text;
             document.body.appendChild(msg);
-            
-            setTimeout(() => {
-                msg.remove();
-            }, 3000);
+            setTimeout(() => msg.remove(), 3000);
         }
 
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                e.preventDefault();
+                undoLastAction();
+            }
+        });
 
+        init();
     </script>
 </body>
 </html>
