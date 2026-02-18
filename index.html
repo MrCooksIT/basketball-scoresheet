@@ -68,10 +68,15 @@
             font-size: 0.9em;
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: var(--court-orange);
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(230, 126, 34, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -85,6 +90,10 @@
             color: white;
         }
 
+        .btn-undo {
+            background: var(--court-orange);
+        }
+
         .scoresheet {
             background: white;
             border-radius: 12px;
@@ -92,37 +101,9 @@
             overflow: hidden;
         }
 
-        .scoresheet-header {
-            background: linear-gradient(135deg, var(--court-dark) 0%, #16213e 100%);
-            color: white;
-            padding: 30px;
-            border-bottom: 4px solid var(--court-orange);
-            position: sticky;
-            top: 0;
-            z-index: 200;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
 
-        .scoresheet-header h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.5em;
-            letter-spacing: 4px;
-        }
 
-        .scoresheet-header select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 35px;
-        }
 
-        .scoresheet-header select option {
-            background: var(--court-dark);
-            color: white;
-        }
 
         .game-info-grid {
             display: grid;
@@ -181,21 +162,7 @@
             background: var(--team-b-color);
         }
 
-        .team-name-input {
-            background: transparent;
-            border: none;
-            color: white;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.5em;
-            letter-spacing: 2px;
-            width: 100%;
-            min-width: 250px;
-            max-width: 400px;
-        }
 
-        .team-name-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
 
         .team-logo {
             width: 50px;
@@ -224,31 +191,7 @@
             font-weight: 700;
         }
 
-        .roster-table {
-            width: 100%;
-            margin-top: 15px;
-        }
 
-        .roster-header {
-            display: grid;
-            grid-template-columns: 40px 180px 200px 1fr;
-            gap: 8px;
-            padding: 8px;
-            background: var(--bg-light);
-            font-weight: 600;
-            font-size: 0.85em;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-
-        .player-row {
-            display: grid;
-            grid-template-columns: 40px 180px 200px 1fr;
-            gap: 8px;
-            padding: 8px;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
 
         .player-row input[type="text"],
         .player-row input[type="number"] {
@@ -274,6 +217,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
+            font-size: 0.7em;
             color: var(--danger);
         }
 
@@ -297,6 +241,7 @@
         .score-controls {
             display: flex;
             gap: 4px;
+            align-items: center;
         }
 
         .score-btn {
@@ -340,13 +285,7 @@
             font-weight: 600;
         }
 
-        .timer-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 25px;
-            background: white;
-        }
+
 
         .timer-display {
             background: var(--court-dark);
@@ -405,7 +344,6 @@
             border-bottom: 1px solid var(--border);
         }
 
-        /* Settings Modal */
         .modal {
             display: none;
             position: fixed;
@@ -535,141 +473,154 @@
 <body>
     <div class="container">
         <!-- Controls Bar -->
-
+        <div class="controls-bar">
+            <button class="btn btn-undo" onclick="undoLastAction()" id="undoBtn" disabled>↶ Undo</button>
+            <button class="btn" onclick="openSettings()">⚙️ Settings</button>
+            <button class="btn" onclick="openScoreboard()">📺 Scoreboard</button>
+            <button class="btn" onclick="saveGame()">💾 Save</button>
+            <button class="btn-secondary btn" onclick="loadGame()">📂 Load</button>
+            <button class="btn" onclick="exportPDF()">📄 Export PDF</button>
+            <button class="btn-secondary btn" onclick="resetGame()">🔄 New Game</button>
+        </div>
 
         <!-- Scoresheet -->
-        <dhtml <div class="scoresheet-header">
-            <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px;">
-                <div style="text-align: left;">
-                    <select id="ageGroup"
-                        style="padding: 8px 15px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-weight: 600; margin-right: 10px; cursor: pointer;">
-                        <option value="">Age Group</option>
-                        <option value="U14">U14</option>
-                        <option value="U16">U16</option>
-                        <option value="U19">U19</option>
-                    </select>
-                    <select id="gender"
-                        style="padding: 8px 15px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-weight: 600; cursor: pointer;">
-                        <option value="">Gender</option>
-                        <option value="Boys">Boys</option>
-                        <option value="Girls">Girls</option>
-                    </select>
+        <div class="scoresheet" id="scoresheet">
+
+
+            <!-- Game Info -->
+            <div class="game-info-grid">
+                <div class="info-field">
+                    <label>Competition</label>
+                    <input type="text" id="competition" placeholder="League name">
                 </div>
-                <div style="text-align: center;">
-                    <h1 style="margin: 0;">🏀SCHOOLS DIGITAL SCORESHEET</h1>
-                    <p style="margin: 5px 0 0 0;">Digital Basketball Game Tracker</p>
+                <div class="info-field">
+                    <label>Date</label>
+                    <input type="date" id="gameDate">
                 </div>
-                <div style="text-align: right;">
-                    <div
-                        style="display: inline-block; background: rgba(0,0,0,0.3); padding: 15px 25px; border-radius: 10px; border: 2px solid rgba(230, 126, 34, 0.5);">
-                        <div style="font-size: 0.75em; opacity: 0.8; margin-bottom: 3px;">GAME CLOCK</div>
-                        <div id="headerTimer"
-                            style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5em; color: var(--court-orange); letter-spacing: 3px; line-height: 1;">
-                            10:00</div>
-                        <div style="font-size: 0.9em; margin-top: 3px; opacity: 0.9;" id="headerQuarter">Q1</div>
+                <div class="info-field">
+                    <label>Time</label>
+                    <input type="time" id="gameTime">
+                </div>
+                <div class="info-field">
+                    <label>Venue</label>
+                    <input type="text" id="venue" placeholder="Place">
+                </div>
+            </div>
+
+            <!-- Teams -->
+            <div class="teams-container">
+                <!-- Team A -->
+                <div class="team-section team-a">
+                    <div class="team-header-row">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div id="teamALogoContainer" class="logo-placeholder" onclick="uploadLogo('A')">+</div>
+                            <input type="text" id="teamAName" class="team-name-input" placeholder="Team A Name">
+                        </div>
+                        <div class="team-score-display" id="teamAScore">0</div>
+                    </div>
+
+                    <div class="roster-header">
+                        <div>#</div>
+                        <div>Player Name</div>
+                        <div>Fouls</div>
+                        <div>Score</div>
+                    </div>
+
+                    <div id="teamARoster"></div>
+                </div>
+
+                <!-- Team B -->
+                <div class="team-section team-b">
+                    <div class="team-header-row">
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div id="teamBLogoContainer" class="logo-placeholder" onclick="uploadLogo('B')">+</div>
+                            <input type="text" id="teamBName" class="team-name-input" placeholder="Team B Name">
+                        </div>
+                        <div class="team-score-display" id="teamBScore">0</div>
+                    </div>
+
+                    <div class="roster-header">
+                        <div>#</div>
+                        <div>Player Name</div>
+                        <div>Fouls</div>
+                        <div>Score</div>
+                    </div>
+
+                    <div id="teamBRoster"></div>
+                </div>
+            </div>
+
+            <!-- Timer & Stats -->
+            <div class="timer-section">
+                <div class="timer-display">
+                    <div style="opacity: 0.7; margin-bottom: 5px;">GAME CLOCK</div>
+                    <div class="timer-time" id="timerDisplay">10:00</div>
+                    <div class="timer-controls">
+                        <button class="btn" style="flex: 1;" id="startTimer">Start</button>
+                        <button class="btn" style="flex: 1;" id="pauseTimer">Pause</button>
+                        <button class="btn" style="flex: 1;" id="resetTimer">Reset</button>
+                    </div>
+                    <div style="margin-top: 10px; text-align: center;">
+                        <label style="font-size: 0.85em; opacity: 0.8;">Quarter Length (min):</label>
+                        <input type="number" id="quarterLength" value="10" min="1" max="20"
+                            style="width: 60px; padding: 5px; margin-left: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; text-align: center;">
+                    </div>
+                    <div class="quarter-selector">
+                        <button class="quarter-btn active" data-quarter="1">Q1</button>
+                        <button class="quarter-btn" data-quarter="2">Q2</button>
+                        <button class="quarter-btn" data-quarter="3">Q3</button>
+                        <button class="quarter-btn" data-quarter="4">Q4</button>
+                    </div>
+                </div>
+
+                <div class="stats-display">
+                    <h3 style="margin-bottom: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5em;">Game Stats
+                    </h3>
+                    <div class="stat-row">
+                        <span>Team A Fouls</span>
+                        <span id="teamAFoulCount">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Team B Fouls</span>
+                        <span id="teamBFoulCount">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Current Quarter</span>
+                        <span id="currentQuarter">1</span>
                     </div>
                 </div>
             </div>
-    </div>
-    <!-- Teams -->
-    <div class="teams-container">
-        <!-- Team A -->
-        <div class="team-section team-a">
-            <div class="team-header-row">
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <div id="teamALogoContainer" class="logo-placeholder" onclick="uploadLogo('A')">
-                        +
-                    </div>
-                    <input type="text" id="teamAName" class="team-name-input" placeholder="Team A Name">
+
+            <!-- Quarter Scores -->
+            <div class="quarter-section">
+                <h3 style="margin-bottom: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5em;">Quarter Scores
+                </h3>
+                <div class="quarter-grid">
+                    <label></label>
+                    <label>Q1</label>
+                    <label>Q2</label>
+                    <label>Q3</label>
+                    <label>Q4</label>
+                    <label>Total</label>
                 </div>
-                <div class="team-score-display" id="teamAScore">0</div>
-            </div>
-
-            <div class="roster-header">
-                <div>#</div>
-                <div>Player Name</div>
-                <div>Fouls</div>
-                <div>Score</div>
-            </div>
-
-            <div id="teamARoster"></div>
-        </div>
-
-        <!-- Team B -->
-        <div class="team-section team-b">
-            <div class="team-header-row">
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <div id="teamBLogoContainer" class="logo-placeholder" onclick="uploadLogo('B')">
-                        +
-                    </div>
-                    <input type="text" id="teamBName" class="team-name-input" placeholder="Team B Name">
+                <div class="quarter-grid">
+                    <label id="teamANameLabel">Team A</label>
+                    <input type="number" id="q1TeamA" value="0" min="0">
+                    <input type="number" id="q2TeamA" value="0" min="0">
+                    <input type="number" id="q3TeamA" value="0" min="0">
+                    <input type="number" id="q4TeamA" value="0" min="0">
+                    <input type="number" id="totalTeamA" value="0" readonly style="background: #e8f5e9;">
                 </div>
-                <div class="team-score-display" id="teamBScore">0</div>
-            </div>
-
-            <div class="roster-header">
-                <div>#</div>
-                <div>Player Name</div>
-                <div>Fouls</div>
-                <div>Score</div>
-            </div>
-
-            <div id="teamBRoster"></div>
-        </div>
-    </div>
-
-    <!-- Timer & Stats -->
-    <div class="timer-section">
-
-
-        <div class="stats-display">
-            <h3 style="margin-bottom: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5em;">Game Stats
-            </h3>
-            <div class="stat-row">
-                <span>Team A Fouls</span>
-                <span id="teamAFoulCount">0</span>
-            </div>
-            <div class="stat-row">
-                <span>Team B Fouls</span>
-                <span id="teamBFoulCount">0</span>
-            </div>
-            <div class="stat-row">
-                <span>Current Quarter</span>
-                <span id="currentQuarter">1</span>
+                <div class="quarter-grid">
+                    <label id="teamBNameLabel">Team B</label>
+                    <input type="number" id="q1TeamB" value="0" min="0">
+                    <input type="number" id="q2TeamB" value="0" min="0">
+                    <input type="number" id="q3TeamB" value="0" min="0">
+                    <input type="number" id="q4TeamB" value="0" min="0">
+                    <input type="number" id="totalTeamB" value="0" readonly style="background: #e8f5e9;">
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Quarter Scores -->
-    <div class="quarter-section">
-        <h3 style="margin-bottom: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5em;">Quarter Scores
-        </h3>
-        <div class="quarter-grid">
-            <label></label>
-            <label>Q1</label>
-            <label>Q2</label>
-            <label>Q3</label>
-            <label>Q4</label>
-            <label>Total</label>
-        </div>
-        <div class="quarter-grid">
-            <label id="teamANameLabel">Team A</label>
-            <input type="number" id="q1TeamA" value="0" min="0">
-            <input type="number" id="q2TeamA" value="0" min="0">
-            <input type="number" id="q3TeamA" value="0" min="0">
-            <input type="number" id="q4TeamA" value="0" min="0">
-            <input type="number" id="totalTeamA" value="0" readonly style="background: #e8f5e9;">
-        </div>
-        <div class="quarter-grid">
-            <label id="teamBNameLabel">Team B</label>
-            <input type="number" id="q1TeamB" value="0" min="0">
-            <input type="number" id="q2TeamB" value="0" min="0">
-            <input type="number" id="q3TeamB" value="0" min="0">
-            <input type="number" id="q4TeamB" value="0" min="0">
-            <input type="number" id="totalTeamB" value="0" readonly style="background: #e8f5e9;">
-        </div>
-    </div>
-    </div>
     </div>
 
     <!-- Settings Modal -->
@@ -715,14 +666,7 @@
                 players: [],
                 totalFouls: 0
             },
-            gameInfo: {
-                competition: '',
-                date: '',
-                time: '',
-                venue: '',
-                ageGroup: '',
-                gender: ''
-            },
+
             quarters: {
                 q1: { teamA: 0, teamB: 0 },
                 q2: { teamA: 0, teamB: 0 },
@@ -733,16 +677,20 @@
             timer: {
                 minutes: 10,
                 seconds: 0,
+                quarterLength: 10,
                 isRunning: false,
                 interval: null
             }
         };
 
+        // Undo system
+        const undoHistory = [];
+        const MAX_UNDO_HISTORY = 20;
         let currentLogoUpload = null;
+        let scoreboardWindow = null;
 
         // Initialize
         function init() {
-            // Initialize 12 players per team
             for (let i = 0; i < 12; i++) {
                 gameState.teamA.players.push({ number: '', name: '', fouls: 0, points: 0 });
                 gameState.teamB.players.push({ number: '', name: '', fouls: 0, points: 0 });
@@ -750,13 +698,8 @@
 
             renderRoster('teamA');
             renderRoster('teamB');
-
-            // Set today's date
             document.getElementById('gameDate').valueAsDate = new Date();
-
-            // Load ();
-
-            // Setup event listeners
+            loadFromLocalStorage();
             setupEventListeners();
         }
 
@@ -802,13 +745,13 @@
         function toggleFoul(team, playerIndex, foulNumber) {
             const teamData = team === 'teamA' ? gameState.teamA : gameState.teamB;
             const player = teamData.players[playerIndex];
+            const oldFouls = player.fouls;
+            const oldTeamFouls = teamData.totalFouls;
 
             if (foulNumber === player.fouls) {
-                // Remove this foul
                 player.fouls--;
                 teamData.totalFouls--;
             } else if (foulNumber === player.fouls + 1) {
-                // Add this foul
                 player.fouls++;
                 teamData.totalFouls++;
 
@@ -816,11 +759,19 @@
                     showMessage(`Player #${player.number || playerIndex + 1} fouled out!`);
                 }
             } else {
-                // Set to this foul number
-                const oldFouls = player.fouls;
                 player.fouls = foulNumber;
                 teamData.totalFouls += (foulNumber - oldFouls);
             }
+
+            addToUndoHistory({
+                type: 'foul',
+                team: team,
+                playerIndex: playerIndex,
+                oldFouls: oldFouls,
+                newFouls: player.fouls,
+                oldTeamFouls: oldTeamFouls,
+                newTeamFouls: teamData.totalFouls
+            });
 
             renderRoster(team);
             updateStats();
@@ -829,8 +780,20 @@
 
         function addPoints(team, playerIndex, points) {
             const teamData = team === 'teamA' ? gameState.teamA : gameState.teamB;
+            const oldPlayerPoints = teamData.players[playerIndex].points;
+            const oldTeamScore = teamData.score;
+
             teamData.players[playerIndex].points += points;
             teamData.score += points;
+
+            addToUndoHistory({
+                type: 'points',
+                team: team,
+                playerIndex: playerIndex,
+                points: points,
+                oldPlayerPoints: oldPlayerPoints,
+                oldTeamScore: oldTeamScore
+            });
 
             renderRoster(team);
             updateScoreDisplay();
@@ -842,20 +805,13 @@
             document.getElementById('teamBScore').textContent = gameState.teamB.score;
         }
 
-        function updateStats() {
-            document.getElementById('teamAFoulCount').textContent = gameState.teamA.totalFouls;
-            document.getElementById('teamBFoulCount').textContent = gameState.teamB.totalFouls;
-            document.getElementById('currentQuarter').textContent = gameState.currentQuarter;
-            document.getElementById('headerQuarter').textContent = 'Q' + gameState.currentQuarter;
-        }
+
 
         function setupEventListeners() {
-            // Timer
             document.getElementById('startTimer').addEventListener('click', startTimer);
             document.getElementById('pauseTimer').addEventListener('click', pauseTimer);
             document.getElementById('resetTimer').addEventListener('click', resetTimer);
 
-            // Quarter buttons
             document.querySelectorAll('.quarter-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                     document.querySelectorAll('.quarter-btn').forEach(b => b.classList.remove('active'));
@@ -866,7 +822,6 @@
                 });
             });
 
-            // Quarter scores
             ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
                 ['TeamA', 'TeamB'].forEach(team => {
                     document.getElementById(quarter + team).addEventListener('input', function () {
@@ -878,18 +833,7 @@
                     });
                 });
             });
-            //Age and gender
-            document.getElementById('ageGroup').addEventListener('change', function () {
-                gameState.gameInfo.ageGroup = this.value;
-                saveToLocalStorage();
-            });
 
-            document.getElementById('gender').addEventListener('change', function () {
-                gameState.gameInfo.gender = this.value;
-                saveToLocalStorage();
-            });
-
-            // Team names
             document.getElementById('teamAName').addEventListener('input', function () {
                 gameState.teamA.name = this.value;
                 document.getElementById('teamANameLabel').textContent = this.value || 'Team A';
@@ -904,217 +848,304 @@
 
 
 
-            function updateQuarterTotals() {
-                const totalA = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamA, 0);
-                const totalB = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamB, 0);
-
-                document.getElementById('totalTeamA').value = totalA;
-                document.getElementById('totalTeamB').value = totalB;
-            }
-
-            // Timer functions
-            function updateTimerDisplay() {
-                const mins = String(gameState.timer.minutes).padStart(2, '0');
-                const secs = String(gameState.timer.seconds).padStart(2, '0');
-                const timeStr = `${mins}:${secs}`;
-                document.getElementById('timerDisplay').textContent = timeStr;
-                document.getElementById('headerTimer').textContent = timeStr;
-            }
-
-            function startTimer() {
+            document.getElementById('quarterLength').addEventListener('change', function () {
+                const newLength = parseInt(this.value) || 10;
+                gameState.timer.quarterLength = newLength;
                 if (!gameState.timer.isRunning) {
-                    gameState.timer.isRunning = true;
-                    gameState.timer.interval = setInterval(() => {
-                        if (gameState.timer.seconds === 0) {
-                            if (gameState.timer.minutes === 0) {
-                                pauseTimer();
-                                showMessage('Time expired!');
-                                return;
-                            }
-                            gameState.timer.minutes--;
-                            gameState.timer.seconds = 59;
-                        } else {
-                            gameState.timer.seconds--;
+                    gameState.timer.minutes = newLength;
+                    gameState.timer.seconds = 0;
+                    updateTimerDisplay();
+                }
+                saveToLocalStorage();
+            });
+
+            document.getElementById('logoUploader').addEventListener('change', handleLogoUpload);
+        }
+
+        function updateQuarterTotals() {
+            const totalA = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamA, 0);
+            const totalB = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamB, 0);
+            document.getElementById('totalTeamA').value = totalA;
+            document.getElementById('totalTeamB').value = totalB;
+        }
+
+
+
+        function startTimer() {
+            if (!gameState.timer.isRunning) {
+                gameState.timer.isRunning = true;
+                gameState.timer.interval = setInterval(() => {
+                    if (gameState.timer.seconds === 0) {
+                        if (gameState.timer.minutes === 0) {
+                            pauseTimer();
+                            showMessage('Time expired!');
+                            return;
                         }
-                        updateTimerDisplay();
-                        saveToLocalStorage();
-                    }, 1000);
+                        gameState.timer.minutes--;
+                        gameState.timer.seconds = 59;
+                    } else {
+                        gameState.timer.seconds--;
+                    }
+                    updateTimerDisplay();
+                    saveToLocalStorage();
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            gameState.timer.isRunning = false;
+            clearInterval(gameState.timer.interval);
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            const quarterLength = parseInt(document.getElementById('quarterLength').value) || 10;
+            gameState.timer.minutes = quarterLength;
+            gameState.timer.seconds = 0;
+            updateTimerDisplay();
+            saveToLocalStorage();
+        }
+
+        function uploadLogo(team) {
+            currentLogoUpload = team;
+            document.getElementById('logoUploader').click();
+        }
+
+        function handleLogoUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const teamKey = currentLogoUpload === 'A' ? 'teamA' : 'teamB';
+                    gameState[teamKey].logo = event.target.result;
+                    const container = document.getElementById(`team${currentLogoUpload}LogoContainer`);
+                    container.innerHTML = `<img src="${event.target.result}" class="team-logo">`;
+                    saveToLocalStorage();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openSettings() {
+            document.getElementById('teamAColorPicker').value = gameState.teamA.color;
+            document.getElementById('teamBColorPicker').value = gameState.teamB.color;
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function applySettings() {
+            gameState.teamA.color = document.getElementById('teamAColorPicker').value;
+            gameState.teamB.color = document.getElementById('teamBColorPicker').value;
+            document.documentElement.style.setProperty('--team-a-color', gameState.teamA.color);
+            document.documentElement.style.setProperty('--team-b-color', gameState.teamB.color);
+            closeSettings();
+            saveToLocalStorage();
+            showMessage('Settings applied!');
+        }
+
+        function openScoreboard() {
+            if (scoreboardWindow && !scoreboardWindow.closed) {
+                scoreboardWindow.focus();
+                return;
+            }
+
+            scoreboardWindow = window.open('scoreboard.html', 'Scoreboard',
+                'width=1400,height=800,menubar=no,toolbar=no,location=no,status=no');
+
+            if (!scoreboardWindow) {
+                alert('Please allow pop-ups to show the scoreboard display');
+                return;
+            }
+
+            setTimeout(() => {
+                if (scoreboardWindow && !scoreboardWindow.closed) {
+                    scoreboardWindow.postMessage({
+                        type: 'scoreboardUpdate',
+                        gameState: gameState
+                    }, '*');
+                }
+            }, 500);
+
+            showMessage('Scoreboard opened! Press F for fullscreen, P to toggle possession');
+        }
+
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'requestScoreboardData') {
+                if (scoreboardWindow && !scoreboardWindow.closed) {
+                    scoreboardWindow.postMessage({
+                        type: 'scoreboardUpdate',
+                        gameState: gameState
+                    }, '*');
                 }
             }
+        });
 
-            function pauseTimer() {
-                gameState.timer.isRunning = false;
-                clearInterval(gameState.timer.interval);
+        function addToUndoHistory(action) {
+            undoHistory.push(action);
+            if (undoHistory.length > MAX_UNDO_HISTORY) {
+                undoHistory.shift();
+            }
+            document.getElementById('undoBtn').disabled = false;
+        }
+
+        function undoLastAction() {
+            if (undoHistory.length === 0) return;
+
+            const action = undoHistory.pop();
+
+            if (action.type === 'points') {
+                const teamData = action.team === 'teamA' ? gameState.teamA : gameState.teamB;
+                teamData.players[action.playerIndex].points = action.oldPlayerPoints;
+                teamData.score = action.oldTeamScore;
+                renderRoster(action.team);
+                updateScoreDisplay();
+                showMessage(`Undone: ${action.points} point${action.points > 1 ? 's' : ''} removed`);
+            } else if (action.type === 'foul') {
+                const teamData = action.team === 'teamA' ? gameState.teamA : gameState.teamB;
+                teamData.players[action.playerIndex].fouls = action.oldFouls;
+                teamData.totalFouls = action.oldTeamFouls;
+                renderRoster(action.team);
+                updateStats();
+                showMessage('Undone: Foul reverted');
             }
 
-
-
-            // Logo upload
-            function uploadLogo(team) {
-                currentLogoUpload = team;
-                document.getElementById('logoUploader').click();
+            if (undoHistory.length === 0) {
+                document.getElementById('undoBtn').disabled = true;
             }
 
-            function handleLogoUpload(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                        const teamKey = currentLogoUpload === 'A' ? 'teamA' : 'teamB';
-                        gameState[teamKey].logo = event.target.result;
+            saveToLocalStorage();
+        }
 
-                        const container = document.getElementById(`team${currentLogoUpload}LogoContainer`);
-                        container.innerHTML = `<img src="${event.target.result}" class="team-logo">`;
-                        saveToLocalStorage();
-                    };
-                    reader.readAsDataURL(file);
-                }
+        function saveToLocalStorage() {
+            localStorage.setItem('basketballGame', JSON.stringify(gameState));
+            if (scoreboardWindow && !scoreboardWindow.closed) {
+                scoreboardWindow.postMessage({
+                    type: 'scoreboardUpdate',
+                    gameState: gameState
+                }, '*');
             }
+        }
 
-            // Settings
-            function openSettings() {
-                document.getElementById('teamAColorPicker').value = gameState.teamA.color;
-                document.getElementById('teamBColorPicker').value = gameState.teamB.color;
-                document.getElementById('settingsModal').classList.add('active');
-            }
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('basketballGame');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.assign(gameState, data);
 
-            function closeSettings() {
-                document.getElementById('settingsModal').classList.remove('active');
-            }
 
-            function applySettings() {
-                gameState.teamA.color = document.getElementById('teamAColorPicker').value;
-                gameState.teamB.color = document.getElementById('teamBColorPicker').value;
 
                 document.documentElement.style.setProperty('--team-a-color', gameState.teamA.color);
                 document.documentElement.style.setProperty('--team-b-color', gameState.teamB.color);
 
-                closeSettings();
-                saveToLocalStorage();
-                showMessage('Settings applied!');
-            }
-
-
-
-            function loadFromLocalStorage() {
-                const saved = localStorage.getItem('basketballGame');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    Object.assign(gameState, data);
-
-                    // Restore UI
-                    document.getElementById('competition').value = gameState.gameInfo.competition;
-                    document.getElementById('gameDate').value = gameState.gameInfo.date;
-                    document.getElementById('gameTime').value = gameState.gameInfo.time;
-                    document.getElementById('venue').value = gameState.gameInfo.venue;
-                    document.getElementById('teamAName').value = gameState.teamA.name;
-                    document.getElementById('teamBName').value = gameState.teamB.name;
-
-                    // Restore colors
-                    document.documentElement.style.setProperty('--team-a-color', gameState.teamA.color);
-                    document.documentElement.style.setProperty('--team-b-color', gameState.teamB.color);
-                    //restore age/gender
-                    if (gameState.gameInfo.ageGroup) {
-                        document.getElementById('ageGroup').value = gameState.gameInfo.ageGroup;
-                    }
-                    if (gameState.gameInfo.gender) {
-                        document.getElementById('gender').value = gameState.gameInfo.gender;
-                    }
-                    // Restore logos
-                    if (gameState.teamA.logo) {
-                        document.getElementById('teamALogoContainer').innerHTML =
-                            `<img src="${gameState.teamA.logo}" class="team-logo">`;
-                    }
-                    if (gameState.teamB.logo) {
-                        document.getElementById('teamBLogoContainer').innerHTML =
-                            `<img src="${gameState.teamB.logo}" class="team-logo">`;
-                    }
-
-
-
-                    function saveGame() {
-                        const dataStr = JSON.stringify(gameState, null, 2);
-                        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                        const url = URL.createObjectURL(dataBlob);
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `basketball_game_${gameState.gameInfo.date || new Date().toISOString().split('T')[0]}.json`;
-                        link.click();
-                        showMessage('Game saved successfully!');
-                    }
-
-                    function loadGame() {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = '.json';
-                        input.onchange = function (e) {
-                            const file = e.target.files[0];
-                            const reader = new FileReader();
-                            reader.onload = function (event) {
-                                try {
-                                    const data = JSON.parse(event.target.result);
-                                    Object.assign(gameState, data);
-                                    loadFromLocalStorage();
-                                    showMessage('Game loaded successfully!');
-                                } catch (error) {
-                                    alert('Error loading file. Please check the file format.');
-                                }
-                            };
-                            reader.readAsText(file);
-                        };
-                        input.click();
-                    }
-
-                    function resetGame() {
-                        if (confirm('Are you sure you want to start a new game? This will clear all current data.')) {
-                            localStorage.removeItem('basketballGame');
-                            location.reload();
-                        }
-                    }
-
-                    async function exportPDF() {
-                        showMessage('Generating PDF... Please wait...');
-
-                        try {
-                            const element = document.getElementById('scoresheet');
-                            const canvas = await html2canvas(element, {
-                                scale: 2,
-                                logging: false,
-                                useCORS: true
-                            });
-
-                            const imgData = canvas.toDataURL('image/png');
-                            const { jsPDF } = window.jspdf;
-                            const pdf = new jsPDF('p', 'mm', 'a4');
-
-                            const imgWidth = 210; // A4 width in mm
-                            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                            pdf.save(`scoresheet_${gameState.gameInfo.date || 'game'}.pdf`);
-
-                            showMessage('PDF exported successfully!');
-                        } catch (error) {
-                            alert('Error exporting PDF: ' + error.message);
-                        }
-                    }
-
-                    function showMessage(text) {
-                        const msg = document.createElement('div');
-                        msg.className = 'success-message';
-                        msg.textContent = text;
-                        document.body.appendChild(msg);
-
-                        setTimeout(() => {
-                            msg.remove();
-                        }, 3000);
-                    }
+                if (gameState.teamA.logo) {
+                    document.getElementById('teamALogoContainer').innerHTML =
+                        `<img src="${gameState.teamA.logo}" class="team-logo">`;
                 }
-            }
+                if (gameState.teamB.logo) {
+                    document.getElementById('teamBLogoContainer').innerHTML =
+                        `<img src="${gameState.teamB.logo}" class="team-logo">`;
+                }
 
-            // Initialize on load
-            init();
+                ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
+                    document.getElementById(quarter + 'TeamA').value = gameState.quarters[quarter].teamA;
+                    document.getElementById(quarter + 'TeamB').value = gameState.quarters[quarter].teamB;
+                });
+
+                if (gameState.timer.quarterLength) {
+                    document.getElementById('quarterLength').value = gameState.timer.quarterLength;
+                }
+
+                renderRoster('teamA');
+                renderRoster('teamB');
+                updateScoreDisplay();
+                updateStats();
+                updateTimerDisplay();
+                updateQuarterTotals();
+            }
         }
+
+        function saveGame() {
+            const dataStr = JSON.stringify(gameState, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `basketball_game_${gameState.gameInfo.date || new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            showMessage('Game saved successfully!');
+        }
+
+        function loadGame() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function (e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        Object.assign(gameState, data);
+                        loadFromLocalStorage();
+                        showMessage('Game loaded successfully!');
+                    } catch (error) {
+                        alert('Error loading file. Please check the file format.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function resetGame() {
+            if (confirm('Are you sure you want to start a new game? This will clear all current data.')) {
+                localStorage.removeItem('basketballGame');
+                location.reload();
+            }
+        }
+
+        async function exportPDF() {
+            showMessage('Generating PDF... Please wait...');
+            try {
+                const element = document.getElementById('scoresheet');
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    logging: false,
+                    useCORS: true
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.save(`scoresheet_${gameState.gameInfo.date || 'game'}.pdf`);
+                showMessage('PDF exported successfully!');
+            } catch (error) {
+                alert('Error exporting PDF: ' + error.message);
+            }
+        }
+
+        function showMessage(text) {
+            const msg = document.createElement('div');
+            msg.className = 'success-message';
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                e.preventDefault();
+                undoLastAction();
+            }
+        });
+
+        init();
     </script>
 </body>
 
