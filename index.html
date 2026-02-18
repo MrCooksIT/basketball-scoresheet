@@ -101,9 +101,20 @@
             overflow: hidden;
         }
 
+        .scoresheet-header {
+            background: linear-gradient(135deg, var(--court-dark) 0%, #16213e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 4px solid var(--court-orange);
+        }
 
-
-
+        .scoresheet-header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5em;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
 
         .game-info-grid {
             display: grid;
@@ -162,7 +173,15 @@
             background: var(--team-b-color);
         }
 
-
+        .team-name-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            letter-spacing: 2px;
+            width: 200px;
+        }
 
         .team-logo {
             width: 50px;
@@ -191,7 +210,26 @@
             font-weight: 700;
         }
 
+        .roster-header {
+            display: grid;
+            grid-template-columns: 50px 150px 200px 1fr;
+            gap: 8px;
+            padding: 8px;
+            background: var(--bg-light);
+            font-weight: 600;
+            font-size: 0.85em;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
 
+        .player-row {
+            display: grid;
+            grid-template-columns: 50px 150px 200px 1fr;
+            gap: 8px;
+            padding: 8px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
 
         .player-row input[type="text"],
         .player-row input[type="number"] {
@@ -485,7 +523,10 @@
 
         <!-- Scoresheet -->
         <div class="scoresheet" id="scoresheet">
-
+            <div class="scoresheet-header">
+                <h1>🏀 OFFICIAL SCORESHEET</h1>
+                <p>Digital Basketball Game Tracker</p>
+            </div>
 
             <!-- Game Info -->
             <div class="game-info-grid">
@@ -666,7 +707,12 @@
                 players: [],
                 totalFouls: 0
             },
-
+            gameInfo: {
+                competition: '',
+                date: '',
+                time: '',
+                venue: ''
+            },
             quarters: {
                 q1: { teamA: 0, teamB: 0 },
                 q2: { teamA: 0, teamB: 0 },
@@ -805,7 +851,11 @@
             document.getElementById('teamBScore').textContent = gameState.teamB.score;
         }
 
-
+        function updateStats() {
+            document.getElementById('teamAFoulCount').textContent = gameState.teamA.totalFouls;
+            document.getElementById('teamBFoulCount').textContent = gameState.teamB.totalFouls;
+            document.getElementById('currentQuarter').textContent = gameState.currentQuarter;
+        }
 
         function setupEventListeners() {
             document.getElementById('startTimer').addEventListener('click', startTimer);
@@ -846,7 +896,13 @@
                 saveToLocalStorage();
             });
 
-
+            ['competition', 'gameDate', 'gameTime', 'venue'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function () {
+                    const field = id === 'gameDate' ? 'date' : id === 'gameTime' ? 'time' : id === 'venue' ? 'venue' : 'competition';
+                    gameState.gameInfo[field] = this.value;
+                    saveToLocalStorage();
+                });
+            });
 
             document.getElementById('quarterLength').addEventListener('change', function () {
                 const newLength = parseInt(this.value) || 10;
@@ -869,7 +925,11 @@
             document.getElementById('totalTeamB').value = totalB;
         }
 
-
+        function updateTimerDisplay() {
+            const mins = String(gameState.timer.minutes).padStart(2, '0');
+            const secs = String(gameState.timer.seconds).padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${mins}:${secs}`;
+        }
 
         function startTimer() {
             if (!gameState.timer.isRunning) {
@@ -1035,7 +1095,12 @@
                 const data = JSON.parse(saved);
                 Object.assign(gameState, data);
 
-
+                document.getElementById('competition').value = gameState.gameInfo.competition;
+                document.getElementById('gameDate').value = gameState.gameInfo.date;
+                document.getElementById('gameTime').value = gameState.gameInfo.time;
+                document.getElementById('venue').value = gameState.gameInfo.venue;
+                document.getElementById('teamAName').value = gameState.teamA.name;
+                document.getElementById('teamBName').value = gameState.teamB.name;
 
                 document.documentElement.style.setProperty('--team-a-color', gameState.teamA.color);
                 document.documentElement.style.setProperty('--team-b-color', gameState.teamB.color);
