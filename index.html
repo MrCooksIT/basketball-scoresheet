@@ -101,19 +101,162 @@
             overflow: hidden;
         }
 
+        /* ── HEADER with embedded timer ── */
         .scoresheet-header {
             background: linear-gradient(135deg, var(--court-dark) 0%, #16213e 100%);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 20px 30px;
             border-bottom: 4px solid var(--court-orange);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .header-title-block {
+            text-align: left;
         }
 
         .scoresheet-header h1 {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.5em;
+            font-size: 2.2em;
             letter-spacing: 4px;
-            margin-bottom: 10px;
+            margin-bottom: 2px;
+        }
+
+        .header-subtitle {
+            font-size: 0.8em;
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        /* Compact timer embedded in header */
+        .header-timer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 280px;
+        }
+
+        .header-timer-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .timer-time {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.8em;
+            color: var(--court-orange);
+            letter-spacing: 3px;
+            line-height: 1;
+        }
+
+        .timer-right {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .quarter-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+
+        .quarter-btn {
+            padding: 5px 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s;
+        }
+
+        .quarter-btn.active {
+            background: var(--court-orange);
+            color: white;
+            border-color: var(--court-orange);
+        }
+
+        .quarter-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .timer-controls .btn {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 0.7em;
+            letter-spacing: 0.5px;
+            border-radius: 5px;
+        }
+
+        .timer-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72em;
+            opacity: 0.65;
+            color: white;
+        }
+
+        .timer-meta input {
+            width: 46px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        /* hide the old standalone timer section */
+        .timer-section-standalone {
+            display: none;
+        }
+
+        /* Stats display (was previously inside timer-section grid) */
+        .stats-display-header {
+            padding: 15px 25px;
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .stat-chip span:last-child {
+            background: var(--court-dark);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
         }
 
         .game-info-grid {
@@ -138,11 +281,47 @@
             margin-bottom: 5px;
         }
 
-        .info-field input {
+        .info-field input,
+        .info-field select {
             padding: 10px;
             border: 2px solid var(--border);
             border-radius: 6px;
             font-size: 1em;
+            background: white;
+        }
+
+        .gender-toggle {
+            display: flex;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+        }
+
+        .gender-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            background: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gender-btn:first-child {
+            border-right: 1px solid var(--border);
+        }
+
+        .gender-btn.active {
+            background: var(--court-dark);
+            color: white;
+        }
+
+        .gender-btn:hover:not(.active) {
+            background: var(--bg-light);
+            color: var(--text-dark);
         }
 
         .teams-container {
@@ -323,65 +502,6 @@
             font-weight: 600;
         }
 
-
-
-        .timer-display {
-            background: var(--court-dark);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .timer-time {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 3em;
-            color: var(--court-orange);
-            letter-spacing: 3px;
-        }
-
-        .timer-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .quarter-selector {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .quarter-btn {
-            padding: 10px;
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .quarter-btn.active {
-            background: var(--court-orange);
-            color: white;
-            border-color: var(--court-orange);
-        }
-
-        .stats-display {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid var(--border);
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -486,11 +606,16 @@
         }
 
         @media (max-width: 1024px) {
-            .teams-container {
+            .scoresheet-header {
                 grid-template-columns: 1fr;
             }
 
-            .timer-section {
+            .header-timer {
+                min-width: unset;
+                width: 100%;
+            }
+
+            .teams-container {
                 grid-template-columns: 1fr;
             }
         }
@@ -523,9 +648,39 @@
 
         <!-- Scoresheet -->
         <div class="scoresheet" id="scoresheet">
+
+            <!-- Header with embedded timer -->
             <div class="scoresheet-header">
-                <h1>🏀 OFFICIAL SCORESHEET</h1>
-                <p>Digital Basketball Game Tracker</p>
+                <div class="header-title-block">
+                    <h1>🏀 OFFICIAL SCORESHEET</h1>
+                    <div class="header-subtitle">Digital Basketball Game Tracker</div>
+                </div>
+
+                <div class="header-timer">
+                    <div class="header-timer-top">
+                        <div class="timer-time" id="timerDisplay">10:00</div>
+                        <div class="timer-right">
+                            <div class="quarter-selector">
+                                <button class="quarter-btn active" data-quarter="1">Q1</button>
+                                <button class="quarter-btn" data-quarter="2">Q2</button>
+                                <button class="quarter-btn" data-quarter="3">Q3</button>
+                                <button class="quarter-btn" data-quarter="4">Q4</button>
+                            </div>
+                            <div class="timer-controls">
+                                <button class="btn" id="startTimer">▶ Start</button>
+                                <button class="btn" id="pauseTimer">⏸ Pause</button>
+                                <button class="btn" id="resetTimer">↺ Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timer-meta">
+                        <span>Quarter length (min):</span>
+                        <input type="number" id="quarterLength" value="10" min="1" max="20">
+                        <span style="margin-left:10px;">Fouls — A: <strong id="teamAFoulCount">0</strong> &nbsp; B:
+                            <strong id="teamBFoulCount">0</strong> &nbsp; Period: <strong
+                                id="currentQuarter">1</strong></span>
+                    </div>
+                </div>
             </div>
 
             <!-- Game Info -->
@@ -546,6 +701,24 @@
                     <label>Venue</label>
                     <input type="text" id="venue" placeholder="Place">
                 </div>
+                <div class="info-field">
+                    <label>Age Group</label>
+                    <select id="ageGroup">
+                        <option value="">— Select —</option>
+                        <option value="U14">U14</option>
+                        <option value="U16">U16</option>
+                        <option value="U19">U19</option>
+                    </select>
+                </div>
+                <div class="info-field">
+                    <label>Gender</label>
+                    <div class="gender-toggle">
+                        <button type="button" class="gender-btn" data-gender="Boys" onclick="setGender('Boys', this)">♂
+                            Boys</button>
+                        <button type="button" class="gender-btn" data-gender="Girls"
+                            onclick="setGender('Girls', this)">♀ Girls</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Teams -->
@@ -559,14 +732,12 @@
                         </div>
                         <div class="team-score-display" id="teamAScore">0</div>
                     </div>
-
                     <div class="roster-header">
                         <div>#</div>
                         <div>Player Name</div>
                         <div>Fouls</div>
                         <div>Score</div>
                     </div>
-
                     <div id="teamARoster"></div>
                 </div>
 
@@ -579,56 +750,13 @@
                         </div>
                         <div class="team-score-display" id="teamBScore">0</div>
                     </div>
-
                     <div class="roster-header">
                         <div>#</div>
                         <div>Player Name</div>
                         <div>Fouls</div>
                         <div>Score</div>
                     </div>
-
                     <div id="teamBRoster"></div>
-                </div>
-            </div>
-
-            <!-- Timer & Stats -->
-            <div class="timer-section">
-                <div class="timer-display">
-                    <div style="opacity: 0.7; margin-bottom: 5px;">GAME CLOCK</div>
-                    <div class="timer-time" id="timerDisplay">10:00</div>
-                    <div class="timer-controls">
-                        <button class="btn" style="flex: 1;" id="startTimer">Start</button>
-                        <button class="btn" style="flex: 1;" id="pauseTimer">Pause</button>
-                        <button class="btn" style="flex: 1;" id="resetTimer">Reset</button>
-                    </div>
-                    <div style="margin-top: 10px; text-align: center;">
-                        <label style="font-size: 0.85em; opacity: 0.8;">Quarter Length (min):</label>
-                        <input type="number" id="quarterLength" value="10" min="1" max="20"
-                            style="width: 60px; padding: 5px; margin-left: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; text-align: center;">
-                    </div>
-                    <div class="quarter-selector">
-                        <button class="quarter-btn active" data-quarter="1">Q1</button>
-                        <button class="quarter-btn" data-quarter="2">Q2</button>
-                        <button class="quarter-btn" data-quarter="3">Q3</button>
-                        <button class="quarter-btn" data-quarter="4">Q4</button>
-                    </div>
-                </div>
-
-                <div class="stats-display">
-                    <h3 style="margin-bottom: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5em;">Game Stats
-                    </h3>
-                    <div class="stat-row">
-                        <span>Team A Fouls</span>
-                        <span id="teamAFoulCount">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Team B Fouls</span>
-                        <span id="teamBFoulCount">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Current Quarter</span>
-                        <span id="currentQuarter">1</span>
-                    </div>
                 </div>
             </div>
 
@@ -671,17 +799,14 @@
                 <h2>Customize Teams</h2>
                 <button class="close-modal" onclick="closeSettings()">&times;</button>
             </div>
-
             <div class="color-picker-group">
                 <label>Team A Color:</label>
                 <input type="color" id="teamAColorPicker" value="#2980b9">
             </div>
-
             <div class="color-picker-group">
                 <label>Team B Color:</label>
                 <input type="color" id="teamBColorPicker" value="#c0392b">
             </div>
-
             <button class="btn" style="width: 100%; margin-top: 20px;" onclick="applySettings()">Apply Changes</button>
         </div>
     </div>
@@ -689,30 +814,10 @@
     <input type="file" id="logoUploader" accept="image/*" style="display: none;">
 
     <script>
-        // Game state
         const gameState = {
-            teamA: {
-                name: '',
-                score: 0,
-                logo: null,
-                color: '#2980b9',
-                players: [],
-                totalFouls: 0
-            },
-            teamB: {
-                name: '',
-                score: 0,
-                logo: null,
-                color: '#c0392b',
-                players: [],
-                totalFouls: 0
-            },
-            gameInfo: {
-                competition: '',
-                date: '',
-                time: '',
-                venue: ''
-            },
+            teamA: { name: '', score: 0, logo: null, color: '#2980b9', players: [], totalFouls: 0 },
+            teamB: { name: '', score: 0, logo: null, color: '#c0392b', players: [], totalFouls: 0 },
+            gameInfo: { competition: '', date: '', time: '', venue: '', ageGroup: '', gender: '' },
             quarters: {
                 q1: { teamA: 0, teamB: 0 },
                 q2: { teamA: 0, teamB: 0 },
@@ -720,28 +825,19 @@
                 q4: { teamA: 0, teamB: 0 }
             },
             currentQuarter: 1,
-            timer: {
-                minutes: 10,
-                seconds: 0,
-                quarterLength: 10,
-                isRunning: false,
-                interval: null
-            }
+            timer: { minutes: 10, seconds: 0, quarterLength: 10, isRunning: false, interval: null }
         };
 
-        // Undo system
         const undoHistory = [];
         const MAX_UNDO_HISTORY = 20;
         let currentLogoUpload = null;
         let scoreboardWindow = null;
 
-        // Initialize
         function init() {
             for (let i = 0; i < 12; i++) {
                 gameState.teamA.players.push({ number: '', name: '', fouls: 0, points: 0 });
                 gameState.teamB.players.push({ number: '', name: '', fouls: 0, points: 0 });
             }
-
             renderRoster('teamA');
             renderRoster('teamB');
             document.getElementById('gameDate').valueAsDate = new Date();
@@ -752,17 +848,11 @@
         function renderRoster(team) {
             const players = team === 'teamA' ? gameState.teamA.players : gameState.teamB.players;
             const container = document.getElementById(team + 'Roster');
-
             container.innerHTML = players.map((player, index) => `
                 <div class="player-row">
-                    <input type="number" 
-                           placeholder="#" 
-                           value="${player.number}"
-                           onchange="updatePlayer('${team}', ${index}, 'number', this.value)"
-                           min="0" max="99">
-                    <input type="text" 
-                           placeholder="Player Name" 
-                           value="${player.name}"
+                    <input type="number" placeholder="#" value="${player.number}"
+                           onchange="updatePlayer('${team}', ${index}, 'number', this.value)" min="0" max="99">
+                    <input type="text" placeholder="Player Name" value="${player.name}"
                            onchange="updatePlayer('${team}', ${index}, 'name', this.value)">
                     <div class="foul-boxes">
                         ${[1, 2, 3, 4, 5].map(foulNum => `
@@ -800,25 +890,13 @@
             } else if (foulNumber === player.fouls + 1) {
                 player.fouls++;
                 teamData.totalFouls++;
-
-                if (player.fouls === 5) {
-                    showMessage(`Player #${player.number || playerIndex + 1} fouled out!`);
-                }
+                if (player.fouls === 5) showMessage(`Player #${player.number || playerIndex + 1} fouled out!`);
             } else {
                 player.fouls = foulNumber;
                 teamData.totalFouls += (foulNumber - oldFouls);
             }
 
-            addToUndoHistory({
-                type: 'foul',
-                team: team,
-                playerIndex: playerIndex,
-                oldFouls: oldFouls,
-                newFouls: player.fouls,
-                oldTeamFouls: oldTeamFouls,
-                newTeamFouls: teamData.totalFouls
-            });
-
+            addToUndoHistory({ type: 'foul', team, playerIndex, oldFouls, newFouls: player.fouls, oldTeamFouls, newTeamFouls: teamData.totalFouls });
             renderRoster(team);
             updateStats();
             saveToLocalStorage();
@@ -828,19 +906,9 @@
             const teamData = team === 'teamA' ? gameState.teamA : gameState.teamB;
             const oldPlayerPoints = teamData.players[playerIndex].points;
             const oldTeamScore = teamData.score;
-
             teamData.players[playerIndex].points += points;
             teamData.score += points;
-
-            addToUndoHistory({
-                type: 'points',
-                team: team,
-                playerIndex: playerIndex,
-                points: points,
-                oldPlayerPoints: oldPlayerPoints,
-                oldTeamScore: oldTeamScore
-            });
-
+            addToUndoHistory({ type: 'points', team, playerIndex, points, oldPlayerPoints, oldTeamScore });
             renderRoster(team);
             updateScoreDisplay();
             saveToLocalStorage();
@@ -896,9 +964,9 @@
                 saveToLocalStorage();
             });
 
-            ['competition', 'gameDate', 'gameTime', 'venue'].forEach(id => {
+            ['competition', 'gameDate', 'gameTime', 'venue', 'ageGroup'].forEach(id => {
                 document.getElementById(id).addEventListener('input', function () {
-                    const field = id === 'gameDate' ? 'date' : id === 'gameTime' ? 'time' : id === 'venue' ? 'venue' : 'competition';
+                    const field = id === 'gameDate' ? 'date' : id === 'gameTime' ? 'time' : id === 'ageGroup' ? 'ageGroup' : id;
                     gameState.gameInfo[field] = this.value;
                     saveToLocalStorage();
                 });
@@ -1011,51 +1079,37 @@
                 scoreboardWindow.focus();
                 return;
             }
-
             scoreboardWindow = window.open('scoreboard.html', 'Scoreboard',
                 'width=1400,height=800,menubar=no,toolbar=no,location=no,status=no');
-
             if (!scoreboardWindow) {
                 alert('Please allow pop-ups to show the scoreboard display');
                 return;
             }
-
             setTimeout(() => {
                 if (scoreboardWindow && !scoreboardWindow.closed) {
-                    scoreboardWindow.postMessage({
-                        type: 'scoreboardUpdate',
-                        gameState: gameState
-                    }, '*');
+                    scoreboardWindow.postMessage({ type: 'scoreboardUpdate', gameState }, '*');
                 }
             }, 500);
-
             showMessage('Scoreboard opened! Press F for fullscreen, P to toggle possession');
         }
 
         window.addEventListener('message', function (event) {
             if (event.data.type === 'requestScoreboardData') {
                 if (scoreboardWindow && !scoreboardWindow.closed) {
-                    scoreboardWindow.postMessage({
-                        type: 'scoreboardUpdate',
-                        gameState: gameState
-                    }, '*');
+                    scoreboardWindow.postMessage({ type: 'scoreboardUpdate', gameState }, '*');
                 }
             }
         });
 
         function addToUndoHistory(action) {
             undoHistory.push(action);
-            if (undoHistory.length > MAX_UNDO_HISTORY) {
-                undoHistory.shift();
-            }
+            if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.shift();
             document.getElementById('undoBtn').disabled = false;
         }
 
         function undoLastAction() {
             if (undoHistory.length === 0) return;
-
             const action = undoHistory.pop();
-
             if (action.type === 'points') {
                 const teamData = action.team === 'teamA' ? gameState.teamA : gameState.teamB;
                 teamData.players[action.playerIndex].points = action.oldPlayerPoints;
@@ -1071,21 +1125,14 @@
                 updateStats();
                 showMessage('Undone: Foul reverted');
             }
-
-            if (undoHistory.length === 0) {
-                document.getElementById('undoBtn').disabled = true;
-            }
-
+            if (undoHistory.length === 0) document.getElementById('undoBtn').disabled = true;
             saveToLocalStorage();
         }
 
         function saveToLocalStorage() {
             localStorage.setItem('basketballGame', JSON.stringify(gameState));
             if (scoreboardWindow && !scoreboardWindow.closed) {
-                scoreboardWindow.postMessage({
-                    type: 'scoreboardUpdate',
-                    gameState: gameState
-                }, '*');
+                scoreboardWindow.postMessage({ type: 'scoreboardUpdate', gameState }, '*');
             }
         }
 
@@ -1101,17 +1148,23 @@
                 document.getElementById('venue').value = gameState.gameInfo.venue;
                 document.getElementById('teamAName').value = gameState.teamA.name;
                 document.getElementById('teamBName').value = gameState.teamB.name;
+                if (gameState.gameInfo.ageGroup) {
+                    document.getElementById('ageGroup').value = gameState.gameInfo.ageGroup;
+                }
+                if (gameState.gameInfo.gender) {
+                    document.querySelectorAll('.gender-btn').forEach(b => {
+                        b.classList.toggle('active', b.dataset.gender === gameState.gameInfo.gender);
+                    });
+                }
 
                 document.documentElement.style.setProperty('--team-a-color', gameState.teamA.color);
                 document.documentElement.style.setProperty('--team-b-color', gameState.teamB.color);
 
                 if (gameState.teamA.logo) {
-                    document.getElementById('teamALogoContainer').innerHTML =
-                        `<img src="${gameState.teamA.logo}" class="team-logo">`;
+                    document.getElementById('teamALogoContainer').innerHTML = `<img src="${gameState.teamA.logo}" class="team-logo">`;
                 }
                 if (gameState.teamB.logo) {
-                    document.getElementById('teamBLogoContainer').innerHTML =
-                        `<img src="${gameState.teamB.logo}" class="team-logo">`;
+                    document.getElementById('teamBLogoContainer').innerHTML = `<img src="${gameState.teamB.logo}" class="team-logo">`;
                 }
 
                 ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
@@ -1122,6 +1175,11 @@
                 if (gameState.timer.quarterLength) {
                     document.getElementById('quarterLength').value = gameState.timer.quarterLength;
                 }
+
+                // Restore active quarter button
+                document.querySelectorAll('.quarter-btn').forEach(b => b.classList.remove('active'));
+                const activeBtn = document.querySelector(`.quarter-btn[data-quarter="${gameState.currentQuarter}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
 
                 renderRoster('teamA');
                 renderRoster('teamB');
@@ -1176,12 +1234,7 @@
             showMessage('Generating PDF... Please wait...');
             try {
                 const element = document.getElementById('scoresheet');
-                const canvas = await html2canvas(element, {
-                    scale: 2,
-                    logging: false,
-                    useCORS: true
-                });
-
+                const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true });
                 const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
@@ -1201,6 +1254,13 @@
             msg.textContent = text;
             document.body.appendChild(msg);
             setTimeout(() => msg.remove(), 3000);
+        }
+
+        function setGender(gender, btn) {
+            gameState.gameInfo.gender = gender;
+            document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            saveToLocalStorage();
         }
 
         document.addEventListener('keydown', function (e) {
