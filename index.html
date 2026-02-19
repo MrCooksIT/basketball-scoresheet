@@ -140,7 +140,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 14px 20px;
-            min-width: 280px;
+            min-width: 300px;
         }
 
         .header-timer-top {
@@ -215,6 +215,8 @@
             font-size: 0.72em;
             opacity: 0.65;
             color: white;
+            width: 100%;
+            flex-wrap: wrap;
         }
 
         .timer-meta input {
@@ -344,12 +346,123 @@
             padding: 15px;
             background: var(--team-a-color);
             color: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
         }
 
         .team-section.team-b .team-header-row {
             background: var(--team-b-color);
+        }
+
+        /* Team stats row (fouls + timeout) below header */
+        .team-stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background: var(--team-a-color);
+            opacity: 0.92;
+            border-radius: 0 0 8px 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .team-section.team-b .team-stats-row {
+            background: var(--team-b-color);
+        }
+
+        .team-foul-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+
+        .foul-count-display {
+            background: rgba(0,0,0,0.3);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .bonus-badge {
+            background: #f1c40f;
+            color: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.78em;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        .bonus-badge.visible {
+            display: inline-block;
+        }
+
+        .timeout-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeout-btn {
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1.5px solid rgba(255,255,255,0.5);
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.75em;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .timeout-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.35);
+            border-color: white;
+        }
+
+        .timeout-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .timeout-pips {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .timeout-pip {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.7);
+            background: transparent;
+            transition: all 0.2s;
+        }
+
+        .timeout-pip.used {
+            background: white;
+            border-color: white;
+        }
+
+        .timeout-remaining-label {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.72em;
+            font-weight: 600;
         }
 
         .team-name-input {
@@ -391,7 +504,7 @@
 
         .roster-header {
             display: grid;
-            grid-template-columns: 50px 150px 200px 1fr;
+            grid-template-columns: 50px 1fr 200px 1fr;
             gap: 8px;
             padding: 8px;
             background: var(--bg-light);
@@ -403,7 +516,7 @@
 
         .player-row {
             display: grid;
-            grid-template-columns: 50px 150px 200px 1fr;
+            grid-template-columns: 50px 1fr 200px 1fr;
             gap: 8px;
             padding: 8px;
             align-items: center;
@@ -416,6 +529,70 @@
             border: 1px solid var(--border);
             border-radius: 4px;
             font-size: 0.9em;
+            width: 100%;
+        }
+
+        /* Player name wrapper with hover tooltip */
+        .player-name-wrapper {
+            position: relative;
+            display: block;
+        }
+
+        .player-name-wrapper input {
+            width: 100%;
+        }
+
+        .score-tooltip {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.78em;
+            white-space: nowrap;
+            z-index: 200;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid rgba(230, 126, 34, 0.4);
+            pointer-events: none;
+        }
+
+        .score-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: #1a1a2e;
+        }
+
+        .score-tooltip-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .score-tooltip-item {
+            text-align: center;
+        }
+
+        .score-tooltip-item .tip-val {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            color: var(--court-orange);
+        }
+
+        .score-tooltip-item .tip-label {
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+
+        .player-name-wrapper:hover .score-tooltip {
+            display: block;
         }
 
         .foul-boxes {
@@ -502,6 +679,12 @@
             font-weight: 600;
         }
 
+        /* Active quarter highlight in grid */
+        .quarter-grid input.active-quarter {
+            border-color: var(--court-orange);
+            background: rgba(230, 126, 34, 0.06);
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -579,6 +762,86 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             animation: slideIn 0.3s ease-out;
             z-index: 2000;
+        }
+
+        /* ── TIMEOUT OVERLAY ── */
+        .timeout-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.82);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .timeout-overlay.active {
+            display: flex;
+        }
+
+        .timeout-overlay-content {
+            text-align: center;
+            color: white;
+        }
+
+        .timeout-team-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.2em;
+            letter-spacing: 4px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .timeout-word {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5em;
+            letter-spacing: 10px;
+            color: var(--court-orange);
+            text-shadow: 0 0 30px rgba(230, 126, 34, 0.7);
+            line-height: 1;
+        }
+
+        .timeout-clock {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 8em;
+            letter-spacing: 6px;
+            line-height: 1;
+            margin: 10px 0;
+            color: white;
+        }
+
+        .timeout-clock.warning {
+            color: var(--danger);
+            animation: pulse 0.6s infinite;
+        }
+
+        .timeout-fiba-note {
+            font-size: 0.9em;
+            opacity: 0.55;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .timeout-end-btn {
+            padding: 14px 36px;
+            background: var(--court-orange);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .timeout-end-btn:hover {
+            background: #d35400;
         }
 
         @keyframes slideIn {
@@ -676,9 +939,11 @@
                     <div class="timer-meta">
                         <span>Quarter length (min):</span>
                         <input type="number" id="quarterLength" value="10" min="1" max="20">
-                        <span style="margin-left:10px;">Fouls — A: <strong id="teamAFoulCount">0</strong> &nbsp; B:
-                            <strong id="teamBFoulCount">0</strong> &nbsp; Period: <strong
-                                id="currentQuarter">1</strong></span>
+                        <span style="margin-left:10px; opacity:0.8;">
+                            Q-Fouls — A: <strong id="teamAFoulCount">0</strong>
+                            &nbsp; B: <strong id="teamBFoulCount">0</strong>
+                            &nbsp; Period: <strong id="currentQuarter">1</strong>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -732,9 +997,22 @@
                         </div>
                         <div class="team-score-display" id="teamAScore">0</div>
                     </div>
+                    <!-- Team A stats row: fouls + timeouts -->
+                    <div class="team-stats-row" id="teamAStatsRow">
+                        <div class="team-foul-info">
+                            <span>Q.FOULS:</span>
+                            <span class="foul-count-display" id="teamAQFoulDisplay">0</span>
+                            <span class="bonus-badge" id="teamABonus">BONUS</span>
+                        </div>
+                        <div class="timeout-info">
+                            <button class="timeout-btn" id="teamATimeoutBtn" onclick="callTimeout('teamA')">⏱ TIMEOUT</button>
+                            <div class="timeout-pips" id="teamATimeoutPips"></div>
+                            <span class="timeout-remaining-label" id="teamATimeoutLabel"></span>
+                        </div>
+                    </div>
                     <div class="roster-header">
                         <div>#</div>
-                        <div>Player Name</div>
+                        <div>Player Name <span style="font-size:0.75em;font-weight:400;opacity:0.6;">(hover for breakdown)</span></div>
                         <div>Fouls</div>
                         <div>Score</div>
                     </div>
@@ -750,9 +1028,22 @@
                         </div>
                         <div class="team-score-display" id="teamBScore">0</div>
                     </div>
+                    <!-- Team B stats row: fouls + timeouts -->
+                    <div class="team-stats-row" id="teamBStatsRow">
+                        <div class="team-foul-info">
+                            <span>Q.FOULS:</span>
+                            <span class="foul-count-display" id="teamBQFoulDisplay">0</span>
+                            <span class="bonus-badge" id="teamBBonus">BONUS</span>
+                        </div>
+                        <div class="timeout-info">
+                            <button class="timeout-btn" id="teamBTimeoutBtn" onclick="callTimeout('teamB')">⏱ TIMEOUT</button>
+                            <div class="timeout-pips" id="teamBTimeoutPips"></div>
+                            <span class="timeout-remaining-label" id="teamBTimeoutLabel"></span>
+                        </div>
+                    </div>
                     <div class="roster-header">
                         <div>#</div>
-                        <div>Player Name</div>
+                        <div>Player Name <span style="font-size:0.75em;font-weight:400;opacity:0.6;">(hover for breakdown)</span></div>
                         <div>Fouls</div>
                         <div>Score</div>
                     </div>
@@ -763,6 +1054,7 @@
             <!-- Quarter Scores -->
             <div class="quarter-section">
                 <h3 style="margin-bottom: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5em;">Quarter Scores
+                    <span style="font-size:0.5em;font-family:'Inter',sans-serif;font-weight:400;opacity:0.6;margin-left:10px;">— auto-updated from player stats</span>
                 </h3>
                 <div class="quarter-grid">
                     <label></label>
@@ -788,6 +1080,10 @@
                     <input type="number" id="q4TeamB" value="0" min="0">
                     <input type="number" id="totalTeamB" value="0" readonly style="background: #e8f5e9;">
                 </div>
+                <div style="margin-top:12px;font-size:0.8em;color:#7f8c8d;">
+                    <strong>FIBA rules:</strong> Team fouls reset each quarter. BONUS (2 free throws) applies from the 5th team foul onward per quarter.
+                    Timeouts: 2 per team in H1 (Q1+Q2), 3 per team in H2 (Q3+Q4). Duration: 60 seconds.
+                </div>
             </div>
         </div>
     </div>
@@ -811,12 +1107,41 @@
         </div>
     </div>
 
+    <!-- Timeout Overlay -->
+    <div class="timeout-overlay" id="timeoutOverlay">
+        <div class="timeout-overlay-content">
+            <div class="timeout-team-label" id="timeoutTeamLabel">TEAM A</div>
+            <div class="timeout-word">TIMEOUT</div>
+            <div class="timeout-clock" id="timeoutClock">1:00</div>
+            <div class="timeout-fiba-note">FIBA — 60 second timeout</div>
+            <button class="timeout-end-btn" onclick="endTimeout(false)">End Timeout Early ▶</button>
+        </div>
+    </div>
+
     <input type="file" id="logoUploader" accept="image/*" style="display: none;">
 
     <script>
+        // ── FIBA CONSTANTS ──
+        const FIBA_TIMEOUT_DURATION = 60; // seconds
+        const FIBA_H1_TIMEOUTS = 2;
+        const FIBA_H2_TIMEOUTS = 3;
+        const FIBA_BONUS_THRESHOLD = 4; // bonus kicks in AFTER 4th team foul
+
         const gameState = {
-            teamA: { name: '', score: 0, logo: null, color: '#2980b9', players: [], totalFouls: 0 },
-            teamB: { name: '', score: 0, logo: null, color: '#c0392b', players: [], totalFouls: 0 },
+            teamA: {
+                name: '', score: 0, logo: null, color: '#2980b9',
+                players: [], totalFouls: 0,
+                quarterFouls: { q1: 0, q2: 0, q3: 0, q4: 0 },
+                timeoutsUsedH1: 0,
+                timeoutsUsedH2: 0
+            },
+            teamB: {
+                name: '', score: 0, logo: null, color: '#c0392b',
+                players: [], totalFouls: 0,
+                quarterFouls: { q1: 0, q2: 0, q3: 0, q4: 0 },
+                timeoutsUsedH1: 0,
+                timeoutsUsedH2: 0
+            },
             gameInfo: { competition: '', date: '', time: '', venue: '', ageGroup: '', gender: '' },
             quarters: {
                 q1: { teamA: 0, teamB: 0 },
@@ -828,32 +1153,75 @@
             timer: { minutes: 10, seconds: 0, quarterLength: 10, isRunning: false, interval: null }
         };
 
+        // Timeout state (runtime only, not persisted)
+        const timeoutState = {
+            active: false,
+            team: null,
+            seconds: FIBA_TIMEOUT_DURATION,
+            interval: null
+        };
+
         const undoHistory = [];
         const MAX_UNDO_HISTORY = 20;
         let currentLogoUpload = null;
         let scoreboardWindow = null;
 
+        function makePlayer() {
+            return { number: '', name: '', fouls: 0, points: 0, ones: 0, twos: 0, threes: 0, quarterPoints: { q1: 0, q2: 0, q3: 0, q4: 0 } };
+        }
+
         function init() {
             for (let i = 0; i < 12; i++) {
-                gameState.teamA.players.push({ number: '', name: '', fouls: 0, points: 0 });
-                gameState.teamB.players.push({ number: '', name: '', fouls: 0, points: 0 });
+                gameState.teamA.players.push(makePlayer());
+                gameState.teamB.players.push(makePlayer());
             }
             renderRoster('teamA');
             renderRoster('teamB');
             document.getElementById('gameDate').valueAsDate = new Date();
             loadFromLocalStorage();
             setupEventListeners();
+            updateTimeoutDisplay_UI();
         }
 
         function renderRoster(team) {
             const players = team === 'teamA' ? gameState.teamA.players : gameState.teamB.players;
             const container = document.getElementById(team + 'Roster');
-            container.innerHTML = players.map((player, index) => `
+            container.innerHTML = players.map((player, index) => {
+                const total = player.points;
+                const ones = player.ones || 0;
+                const twos = player.twos || 0;
+                const threes = player.threes || 0;
+                // Only show tooltip if player has scored anything
+                const hasScored = total > 0;
+                return `
                 <div class="player-row">
                     <input type="number" placeholder="#" value="${player.number}"
                            onchange="updatePlayer('${team}', ${index}, 'number', this.value)" min="0" max="99">
-                    <input type="text" placeholder="Player Name" value="${player.name}"
-                           onchange="updatePlayer('${team}', ${index}, 'name', this.value)">
+                    <div class="player-name-wrapper">
+                        <input type="text" placeholder="Player Name" value="${player.name}"
+                               onchange="updatePlayer('${team}', ${index}, 'name', this.value)">
+                        ${hasScored ? `
+                        <div class="score-tooltip">
+                            <div class="score-tooltip-row">
+                                <div class="score-tooltip-item">
+                                    <div class="tip-val">${ones}</div>
+                                    <div class="tip-label">Free Throw${ones !== 1 ? 's' : ''}</div>
+                                </div>
+                                <div class="score-tooltip-item">
+                                    <div class="tip-val">${twos}</div>
+                                    <div class="tip-label">2-Pointer${twos !== 1 ? 's' : ''}</div>
+                                </div>
+                                <div class="score-tooltip-item">
+                                    <div class="tip-val">${threes}</div>
+                                    <div class="tip-label">3-Pointer${threes !== 1 ? 's' : ''}</div>
+                                </div>
+                                <div class="score-tooltip-item" style="border-left:1px solid rgba(255,255,255,0.2);padding-left:16px;">
+                                    <div class="tip-val">${total}</div>
+                                    <div class="tip-label">Total Pts</div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+                    </div>
                     <div class="foul-boxes">
                         ${[1, 2, 3, 4, 5].map(foulNum => `
                             <div class="foul-box ${player.fouls >= foulNum ? 'active' : ''} ${player.fouls >= 5 ? 'fouled-out' : ''}"
@@ -869,7 +1237,7 @@
                         <span style="margin-left: 10px; font-weight: 600;">${player.points}</span>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function updatePlayer(team, index, field, value) {
@@ -883,20 +1251,26 @@
             const player = teamData.players[playerIndex];
             const oldFouls = player.fouls;
             const oldTeamFouls = teamData.totalFouls;
+            const currentQ = `q${gameState.currentQuarter}`;
+            const oldQuarterFouls = teamData.quarterFouls[currentQ];
 
+            let foulDelta = 0;
             if (foulNumber === player.fouls) {
                 player.fouls--;
-                teamData.totalFouls--;
+                foulDelta = -1;
             } else if (foulNumber === player.fouls + 1) {
                 player.fouls++;
-                teamData.totalFouls++;
+                foulDelta = 1;
                 if (player.fouls === 5) showMessage(`Player #${player.number || playerIndex + 1} fouled out!`);
             } else {
                 player.fouls = foulNumber;
-                teamData.totalFouls += (foulNumber - oldFouls);
+                foulDelta = foulNumber - oldFouls;
             }
 
-            addToUndoHistory({ type: 'foul', team, playerIndex, oldFouls, newFouls: player.fouls, oldTeamFouls, newTeamFouls: teamData.totalFouls });
+            teamData.totalFouls += foulDelta;
+            teamData.quarterFouls[currentQ] = Math.max(0, (teamData.quarterFouls[currentQ] || 0) + foulDelta);
+
+            addToUndoHistory({ type: 'foul', team, playerIndex, oldFouls, newFouls: player.fouls, oldTeamFouls, newTeamFouls: teamData.totalFouls, oldQuarterFouls, newQuarterFouls: teamData.quarterFouls[currentQ] });
             renderRoster(team);
             updateStats();
             saveToLocalStorage();
@@ -904,13 +1278,32 @@
 
         function addPoints(team, playerIndex, points) {
             const teamData = team === 'teamA' ? gameState.teamA : gameState.teamB;
-            const oldPlayerPoints = teamData.players[playerIndex].points;
+            const player = teamData.players[playerIndex];
+            const oldPlayerPoints = player.points;
             const oldTeamScore = teamData.score;
-            teamData.players[playerIndex].points += points;
+            const currentQ = `q${gameState.currentQuarter}`;
+            const oldQuarterPts = player.quarterPoints[currentQ] || 0;
+            const oldOnes = player.ones || 0;
+            const oldTwos = player.twos || 0;
+            const oldThrees = player.threes || 0;
+
+            player.points += points;
+            player.quarterPoints[currentQ] = (player.quarterPoints[currentQ] || 0) + points;
             teamData.score += points;
-            addToUndoHistory({ type: 'points', team, playerIndex, points, oldPlayerPoints, oldTeamScore });
+
+            if (points === 1) player.ones = (player.ones || 0) + 1;
+            else if (points === 2) player.twos = (player.twos || 0) + 1;
+            else if (points === 3) player.threes = (player.threes || 0) + 1;
+
+            addToUndoHistory({
+                type: 'points', team, playerIndex, points,
+                oldPlayerPoints, oldTeamScore, currentQ,
+                oldQuarterPts, oldOnes, oldTwos, oldThrees
+            });
+
             renderRoster(team);
             updateScoreDisplay();
+            updateQuarterGridFromPlayers();
             saveToLocalStorage();
         }
 
@@ -919,10 +1312,73 @@
             document.getElementById('teamBScore').textContent = gameState.teamB.score;
         }
 
+        function getCurrentQuarterFouls(teamData) {
+            const currentQ = `q${gameState.currentQuarter}`;
+            return teamData.quarterFouls[currentQ] || 0;
+        }
+
         function updateStats() {
-            document.getElementById('teamAFoulCount').textContent = gameState.teamA.totalFouls;
-            document.getElementById('teamBFoulCount').textContent = gameState.teamB.totalFouls;
+            const qFoulsA = getCurrentQuarterFouls(gameState.teamA);
+            const qFoulsB = getCurrentQuarterFouls(gameState.teamB);
+
+            // Timer meta (compact)
+            document.getElementById('teamAFoulCount').textContent = qFoulsA;
+            document.getElementById('teamBFoulCount').textContent = qFoulsB;
             document.getElementById('currentQuarter').textContent = gameState.currentQuarter;
+
+            // Team stats row
+            document.getElementById('teamAQFoulDisplay').textContent = qFoulsA;
+            document.getElementById('teamBQFoulDisplay').textContent = qFoulsB;
+
+            // BONUS indicator: show when team has committed 4+ fouls (5th foul = bonus)
+            document.getElementById('teamABonus').classList.toggle('visible', qFoulsA >= FIBA_BONUS_THRESHOLD);
+            document.getElementById('teamBBonus').classList.toggle('visible', qFoulsB >= FIBA_BONUS_THRESHOLD);
+
+            updateTimeoutDisplay_UI();
+            highlightActiveQuarterInputs();
+        }
+
+        function updateTimeoutDisplay_UI() {
+            ['teamA', 'teamB'].forEach(teamKey => {
+                const teamData = gameState[teamKey];
+                const isH1 = gameState.currentQuarter <= 2;
+                const used = isH1 ? (teamData.timeoutsUsedH1 || 0) : (teamData.timeoutsUsedH2 || 0);
+                const max = isH1 ? FIBA_H1_TIMEOUTS : FIBA_H2_TIMEOUTS;
+                const remaining = max - used;
+                const halfLabel = isH1 ? 'H1' : 'H2';
+
+                // Render pips
+                const pipsEl = document.getElementById(`${teamKey}TimeoutPips`);
+                if (pipsEl) {
+                    pipsEl.innerHTML = Array.from({ length: max }, (_, i) =>
+                        `<span class="timeout-pip ${i < used ? 'used' : ''}"></span>`
+                    ).join('');
+                }
+
+                const labelEl = document.getElementById(`${teamKey}TimeoutLabel`);
+                if (labelEl) {
+                    labelEl.textContent = `${remaining} left (${halfLabel})`;
+                }
+
+                // Disable button if no timeouts remain
+                const btn = document.getElementById(`${teamKey}TimeoutBtn`);
+                if (btn) {
+                    btn.disabled = remaining <= 0;
+                    btn.title = remaining <= 0
+                        ? `No timeouts remaining this ${halfLabel}`
+                        : `Call timeout (${remaining} remaining this ${halfLabel})`;
+                }
+            });
+        }
+
+        function highlightActiveQuarterInputs() {
+            const q = gameState.currentQuarter;
+            ['TeamA', 'TeamB'].forEach(team => {
+                ['q1', 'q2', 'q3', 'q4'].forEach((quarter, idx) => {
+                    const el = document.getElementById(quarter + team);
+                    if (el) el.classList.toggle('active-quarter', idx + 1 === q);
+                });
+            });
         }
 
         function setupEventListeners() {
@@ -932,9 +1388,25 @@
 
             document.querySelectorAll('.quarter-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
+                    const newQuarter = parseInt(this.dataset.quarter);
+                    if (newQuarter === gameState.currentQuarter) return;
+
+                    // Save current quarter data before switching
+                    updateQuarterGridFromPlayers();
+
                     document.querySelectorAll('.quarter-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    gameState.currentQuarter = parseInt(this.dataset.quarter);
+                    gameState.currentQuarter = newQuarter;
+
+                    // Reset timer for new quarter if timer is not running
+                    if (!gameState.timer.isRunning) {
+                        const quarterLength = parseInt(document.getElementById('quarterLength').value) || 10;
+                        gameState.timer.minutes = quarterLength;
+                        gameState.timer.seconds = 0;
+                        updateTimerDisplay();
+                        showMessage(`Q${newQuarter} — timer reset. Team fouls reset for this quarter.`);
+                    }
+
                     updateStats();
                     saveToLocalStorage();
                 });
@@ -986,6 +1458,19 @@
             document.getElementById('logoUploader').addEventListener('change', handleLogoUpload);
         }
 
+        // Auto-populate quarter scores from player quarter point tracking
+        function updateQuarterGridFromPlayers() {
+            ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
+                const qA = gameState.teamA.players.reduce((sum, p) => sum + (p.quarterPoints && p.quarterPoints[quarter] ? p.quarterPoints[quarter] : 0), 0);
+                const qB = gameState.teamB.players.reduce((sum, p) => sum + (p.quarterPoints && p.quarterPoints[quarter] ? p.quarterPoints[quarter] : 0), 0);
+                document.getElementById(quarter + 'TeamA').value = qA;
+                document.getElementById(quarter + 'TeamB').value = qB;
+                gameState.quarters[quarter].teamA = qA;
+                gameState.quarters[quarter].teamB = qB;
+            });
+            updateQuarterTotals();
+        }
+
         function updateQuarterTotals() {
             const totalA = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamA, 0);
             const totalB = Object.values(gameState.quarters).reduce((sum, q) => sum + q.teamB, 0);
@@ -1023,6 +1508,7 @@
         function pauseTimer() {
             gameState.timer.isRunning = false;
             clearInterval(gameState.timer.interval);
+            gameState.timer.interval = null;
         }
 
         function resetTimer() {
@@ -1032,6 +1518,83 @@
             gameState.timer.seconds = 0;
             updateTimerDisplay();
             saveToLocalStorage();
+        }
+
+        // ── TIMEOUT FUNCTIONS ──
+
+        function callTimeout(team) {
+            const teamData = gameState[team];
+            const isH1 = gameState.currentQuarter <= 2;
+            const halfKey = isH1 ? 'timeoutsUsedH1' : 'timeoutsUsedH2';
+            const max = isH1 ? FIBA_H1_TIMEOUTS : FIBA_H2_TIMEOUTS;
+
+            if ((teamData[halfKey] || 0) >= max) {
+                showMessage(`No timeouts remaining this ${isH1 ? 'first' : 'second'} half!`);
+                return;
+            }
+
+            // Use a timeout
+            teamData[halfKey] = (teamData[halfKey] || 0) + 1;
+
+            // Pause the game clock
+            const wasRunning = gameState.timer.isRunning;
+            pauseTimer();
+
+            // Start timeout countdown
+            timeoutState.active = true;
+            timeoutState.team = team;
+            timeoutState.wasClockRunning = wasRunning;
+            timeoutState.seconds = FIBA_TIMEOUT_DURATION;
+
+            showTimeoutOverlay(team);
+            updateTimeoutCountdownDisplay();
+
+            timeoutState.interval = setInterval(() => {
+                timeoutState.seconds--;
+                updateTimeoutCountdownDisplay();
+                if (timeoutState.seconds <= 0) {
+                    endTimeout(true);
+                }
+            }, 1000);
+
+            updateStats();
+            saveToLocalStorage();
+        }
+
+        function showTimeoutOverlay(team) {
+            const teamName = gameState[team].name || (team === 'teamA' ? 'Team A' : 'Team B');
+            document.getElementById('timeoutTeamLabel').textContent = teamName.toUpperCase();
+            document.getElementById('timeoutOverlay').classList.add('active');
+        }
+
+        function hideTimeoutOverlay() {
+            document.getElementById('timeoutOverlay').classList.remove('active');
+        }
+
+        function updateTimeoutCountdownDisplay() {
+            const secs = timeoutState.seconds;
+            const mm = String(Math.floor(secs / 60)).padStart(1, '0');
+            const ss = String(secs % 60).padStart(2, '0');
+            const el = document.getElementById('timeoutClock');
+            el.textContent = `${mm}:${ss}`;
+            el.classList.toggle('warning', secs <= 10);
+        }
+
+        function endTimeout(autoResume) {
+            clearInterval(timeoutState.interval);
+            timeoutState.interval = null;
+            timeoutState.active = false;
+            hideTimeoutOverlay();
+
+            if (autoResume || timeoutState.wasClockRunning) {
+                startTimer();
+                showMessage('Timeout over — clock resumed!');
+            } else {
+                showMessage('Timeout ended.');
+            }
+
+            timeoutState.team = null;
+            timeoutState.wasClockRunning = false;
         }
 
         function uploadLogo(team) {
@@ -1112,15 +1675,23 @@
             const action = undoHistory.pop();
             if (action.type === 'points') {
                 const teamData = action.team === 'teamA' ? gameState.teamA : gameState.teamB;
-                teamData.players[action.playerIndex].points = action.oldPlayerPoints;
+                const player = teamData.players[action.playerIndex];
+                player.points = action.oldPlayerPoints;
+                player.quarterPoints[action.currentQ] = action.oldQuarterPts;
+                player.ones = action.oldOnes;
+                player.twos = action.oldTwos;
+                player.threes = action.oldThrees;
                 teamData.score = action.oldTeamScore;
                 renderRoster(action.team);
                 updateScoreDisplay();
+                updateQuarterGridFromPlayers();
                 showMessage(`Undone: ${action.points} point${action.points > 1 ? 's' : ''} removed`);
             } else if (action.type === 'foul') {
                 const teamData = action.team === 'teamA' ? gameState.teamA : gameState.teamB;
+                const currentQ = `q${gameState.currentQuarter}`;
                 teamData.players[action.playerIndex].fouls = action.oldFouls;
                 teamData.totalFouls = action.oldTeamFouls;
+                teamData.quarterFouls[currentQ] = action.oldQuarterFouls;
                 renderRoster(action.team);
                 updateStats();
                 showMessage('Undone: Foul reverted');
@@ -1130,24 +1701,51 @@
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('basketballGame', JSON.stringify(gameState));
+            // Don't persist timer interval (it's a function reference)
+            const toSave = JSON.parse(JSON.stringify({
+                ...gameState,
+                timer: { ...gameState.timer, interval: null }
+            }));
+            localStorage.setItem('basketballGame', JSON.stringify(toSave));
             if (scoreboardWindow && !scoreboardWindow.closed) {
                 scoreboardWindow.postMessage({ type: 'scoreboardUpdate', gameState }, '*');
             }
+        }
+
+        function migratePlayerData(player) {
+            // Ensure new fields exist when loading older saves
+            if (!player.quarterPoints) player.quarterPoints = { q1: 0, q2: 0, q3: 0, q4: 0 };
+            if (player.ones === undefined) player.ones = 0;
+            if (player.twos === undefined) player.twos = 0;
+            if (player.threes === undefined) player.threes = 0;
+            return player;
+        }
+
+        function migrateTeamData(team) {
+            if (!team.quarterFouls) team.quarterFouls = { q1: 0, q2: 0, q3: 0, q4: 0 };
+            if (team.timeoutsUsedH1 === undefined) team.timeoutsUsedH1 = 0;
+            if (team.timeoutsUsedH2 === undefined) team.timeoutsUsedH2 = 0;
+            if (team.players) team.players = team.players.map(migratePlayerData);
+            return team;
         }
 
         function loadFromLocalStorage() {
             const saved = localStorage.getItem('basketballGame');
             if (saved) {
                 const data = JSON.parse(saved);
+                // Migrate old saves
+                if (data.teamA) data.teamA = migrateTeamData(data.teamA);
+                if (data.teamB) data.teamB = migrateTeamData(data.teamB);
                 Object.assign(gameState, data);
+                gameState.timer.interval = null;
+                gameState.timer.isRunning = false;
 
-                document.getElementById('competition').value = gameState.gameInfo.competition;
-                document.getElementById('gameDate').value = gameState.gameInfo.date;
-                document.getElementById('gameTime').value = gameState.gameInfo.time;
-                document.getElementById('venue').value = gameState.gameInfo.venue;
-                document.getElementById('teamAName').value = gameState.teamA.name;
-                document.getElementById('teamBName').value = gameState.teamB.name;
+                document.getElementById('competition').value = gameState.gameInfo.competition || '';
+                document.getElementById('gameDate').value = gameState.gameInfo.date || '';
+                document.getElementById('gameTime').value = gameState.gameInfo.time || '';
+                document.getElementById('venue').value = gameState.gameInfo.venue || '';
+                document.getElementById('teamAName').value = gameState.teamA.name || '';
+                document.getElementById('teamBName').value = gameState.teamB.name || '';
                 if (gameState.gameInfo.ageGroup) {
                     document.getElementById('ageGroup').value = gameState.gameInfo.ageGroup;
                 }
@@ -1168,8 +1766,8 @@
                 }
 
                 ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
-                    document.getElementById(quarter + 'TeamA').value = gameState.quarters[quarter].teamA;
-                    document.getElementById(quarter + 'TeamB').value = gameState.quarters[quarter].teamB;
+                    document.getElementById(quarter + 'TeamA').value = gameState.quarters[quarter].teamA || 0;
+                    document.getElementById(quarter + 'TeamB').value = gameState.quarters[quarter].teamB || 0;
                 });
 
                 if (gameState.timer.quarterLength) {
@@ -1187,11 +1785,19 @@
                 updateStats();
                 updateTimerDisplay();
                 updateQuarterTotals();
+
+                // Update name labels
+                document.getElementById('teamANameLabel').textContent = gameState.teamA.name || 'Team A';
+                document.getElementById('teamBNameLabel').textContent = gameState.teamB.name || 'Team B';
             }
         }
 
         function saveGame() {
-            const dataStr = JSON.stringify(gameState, null, 2);
+            const toSave = JSON.parse(JSON.stringify({
+                ...gameState,
+                timer: { ...gameState.timer, interval: null }
+            }));
+            const dataStr = JSON.stringify(toSave, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
@@ -1211,6 +1817,8 @@
                 reader.onload = function (event) {
                     try {
                         const data = JSON.parse(event.target.result);
+                        if (data.teamA) data.teamA = migrateTeamData(data.teamA);
+                        if (data.teamB) data.teamB = migrateTeamData(data.teamB);
                         Object.assign(gameState, data);
                         loadFromLocalStorage();
                         showMessage('Game loaded successfully!');
