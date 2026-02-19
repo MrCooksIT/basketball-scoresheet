@@ -51,16 +51,21 @@
         .team-label {
             background: #000;
             color: #fff;
-            padding: 15px 40px;
+            padding: 15px 20px;
             border-radius: 10px;
-            font-size: 2em;
+            font-size: clamp(1em, 2.5vw, 2em);
             font-weight: 900;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
             border: 3px solid rgba(255,255,255,0.1);
             min-width: 250px;
+            max-width: 100%;
+            width: 100%;
             text-align: center;
             box-shadow: inset 0 0 20px rgba(255,255,255,0.05);
+            overflow-wrap: break-word;
+            white-space: normal;
+            box-sizing: border-box;
         }
 
         .score-display {
@@ -234,8 +239,8 @@
             }
             
             .team-label {
-                font-size: 1.5em;
-                padding: 12px 30px;
+                font-size: clamp(0.8em, 2vw, 1.5em);
+                padding: 12px 15px;
             }
         }
 
