@@ -912,7 +912,7 @@
             <button class="btn" onclick="openScoreboard()">📺 Scoreboard</button>
             <button class="btn" onclick="saveGame()">💾 Save</button>
             <button class="btn-secondary btn" onclick="loadGame()">📂 Load</button>
-            <button class="btn" onclick="exportPDF()">📄 Export PDF</button>
+            <button class="btn" onclick="exportPDF()">📄 Export FIBA PDF</button>
             <button class="btn-secondary btn" onclick="resetGame()">🔄 New Game</button>
         </div>
 
@@ -1845,21 +1845,305 @@
             }
         }
 
+        // ─── FIBA Scoresheet PDF Generation ────────────────────────────────────────
+
+        function buildFIBAHeader() {
+            const gi = gameState.gameInfo;
+            return `
+            <div class="fiba-header">
+                <div class="fiba-title-block">
+                    <div class="fiba-main-title">BASKETBALL SCORESHEET</div>
+                    <div class="fiba-subtitle">FIBA Official Format</div>
+                </div>
+                <div class="fiba-info-fields">
+                    <span class="fiba-field"><b>Competition:</b> ${gi.competition || '—'}</span>
+                    <span class="fiba-field"><b>Date:</b> ${gi.date || '—'}</span>
+                    <span class="fiba-field"><b>Time:</b> ${gi.time || '—'}</span>
+                    <span class="fiba-field"><b>Venue:</b> ${gi.venue || '—'}</span>
+                    <span class="fiba-field"><b>Age Group:</b> ${gi.ageGroup || '—'}</span>
+                    <span class="fiba-field"><b>Gender:</b> ${gi.gender || '—'}</span>
+                </div>
+                <div class="fiba-ref-fields">
+                    <span class="fiba-field">Referee 1: ____________________</span>
+                    <span class="fiba-field">Referee 2: ____________________</span>
+                </div>
+            </div>`;
+        }
+
+        function buildPlayerRow(player, isBlank) {
+            if (isBlank) {
+                return `<tr class="fiba-player-row fiba-blank-row">
+                    <td class="fiba-cell-num"></td>
+                    <td class="fiba-cell-start"><div class="fiba-start-box"></div></td>
+                    <td class="fiba-cell-name"></td>
+                    <td class="fiba-foul-cell"><div class="fiba-foul-box"></div></td>
+                    <td class="fiba-foul-cell"><div class="fiba-foul-box"></div></td>
+                    <td class="fiba-foul-cell"><div class="fiba-foul-box"></div></td>
+                    <td class="fiba-foul-cell"><div class="fiba-foul-box"></div></td>
+                    <td class="fiba-foul-cell"><div class="fiba-foul-box"></div></td>
+                    <td class="fiba-cell-pts"></td>
+                    <td class="fiba-cell-pts"></td>
+                    <td class="fiba-cell-pts"></td>
+                    <td class="fiba-cell-total"></td>
+                </tr>`;
+            }
+            const fouledOut = player.fouls >= 5;
+            const foulBoxes = [1,2,3,4,5].map(n => {
+                const filled = player.fouls >= n;
+                return `<td class="fiba-foul-cell"><div class="fiba-foul-box${filled ? ' fiba-foul-filled' : ''}">${filled ? 'F' : ''}</div></td>`;
+            }).join('');
+            return `<tr class="fiba-player-row${fouledOut ? ' fiba-player-out' : ''}">
+                <td class="fiba-cell-num">${player.number || ''}</td>
+                <td class="fiba-cell-start"><div class="fiba-start-box"></div></td>
+                <td class="fiba-cell-name">${(player.name || '').substring(0, 24)}</td>
+                ${foulBoxes}
+                <td class="fiba-cell-pts">${player.ones || 0}</td>
+                <td class="fiba-cell-pts">${player.twos || 0}</td>
+                <td class="fiba-cell-pts">${player.threes || 0}</td>
+                <td class="fiba-cell-total">${player.points || 0}</td>
+            </tr>`;
+        }
+
+        function buildRunningScoreGrid(finalScore) {
+            const capped = Math.min(finalScore, 100);
+            let cells = '';
+            for (let n = 1; n <= 100; n++) {
+                const crossed = n <= capped;
+                cells += `<div class="fiba-score-cell${crossed ? ' fiba-score-crossed' : ''}">${n}</div>`;
+            }
+            const overNote = finalScore > 100 ? `<div class="fiba-score-overnote">Score: ${finalScore}</div>` : '';
+            return `<div class="fiba-score-grid-wrap">
+                <div class="fiba-score-grid-label">RUNNING SCORE</div>
+                <div class="fiba-score-grid">${cells}</div>
+                ${overNote}
+            </div>`;
+        }
+
+        function buildTimeoutBoxes(used, max) {
+            return Array.from({length: max}, (_, i) => {
+                const isUsed = i < used;
+                return `<div class="fiba-timeout-box${isUsed ? ' fiba-timeout-used' : ''}">${isUsed ? 'X' : ''}</div>`;
+            }).join('');
+        }
+
+        function buildTeamBlock(teamData, teamLabel) {
+            const activePlayers = teamData.players.filter(p => p.name || p.number);
+            const blankCount = Math.max(0, 8 - activePlayers.length);
+            const playerRows = activePlayers.map(p => buildPlayerRow(p, false)).join('') +
+                               Array(blankCount).fill(null).map(() => buildPlayerRow(null, true)).join('');
+
+            const logoTag = teamData.logo
+                ? `<img src="${teamData.logo}" style="height:18px;width:18px;object-fit:contain;margin-right:4px;vertical-align:middle;">`
+                : '';
+
+            const qf = teamData.quarterFouls || {};
+            const h1Used = teamData.timeoutsUsedH1 || 0;
+            const h2Used = teamData.timeoutsUsedH2 || 0;
+
+            return `
+            <div class="fiba-team-block">
+                <div class="fiba-team-title-bar">
+                    <span class="fiba-team-label">${teamLabel}</span>
+                    <span class="fiba-team-name">${logoTag}${teamData.name || teamLabel}</span>
+                    <span class="fiba-team-score">${teamData.score || 0}</span>
+                </div>
+                <div class="fiba-team-body">
+                    <div class="fiba-roster-wrap">
+                        <table class="fiba-roster">
+                            <thead>
+                                <tr class="fiba-thead-row">
+                                    <th class="fiba-cell-num">#</th>
+                                    <th class="fiba-cell-start">✓</th>
+                                    <th class="fiba-cell-name">PLAYER NAME</th>
+                                    <th class="fiba-foul-cell">P1</th>
+                                    <th class="fiba-foul-cell">P2</th>
+                                    <th class="fiba-foul-cell">P3</th>
+                                    <th class="fiba-foul-cell">P4</th>
+                                    <th class="fiba-foul-cell">P5</th>
+                                    <th class="fiba-cell-pts">1pt</th>
+                                    <th class="fiba-cell-pts">2pt</th>
+                                    <th class="fiba-cell-pts">3pt</th>
+                                    <th class="fiba-cell-total">TOT</th>
+                                </tr>
+                            </thead>
+                            <tbody>${playerRows}</tbody>
+                        </table>
+                        <div class="fiba-meta-bar">
+                            <div class="fiba-qfouls">
+                                <span class="fiba-meta-label">TEAM FOULS:</span>
+                                <span class="fiba-qf-item">Q1 <b>${qf.q1 || 0}</b></span>
+                                <span class="fiba-qf-item">Q2 <b>${qf.q2 || 0}</b></span>
+                                <span class="fiba-qf-item">Q3 <b>${qf.q3 || 0}</b></span>
+                                <span class="fiba-qf-item">Q4 <b>${qf.q4 || 0}</b></span>
+                            </div>
+                            <div class="fiba-timeouts">
+                                <span class="fiba-meta-label">TIMEOUTS H1:</span>
+                                ${buildTimeoutBoxes(h1Used, 2)}
+                                <span class="fiba-meta-label" style="margin-left:6px;">H2:</span>
+                                ${buildTimeoutBoxes(h2Used, 3)}
+                            </div>
+                        </div>
+                    </div>
+                    ${buildRunningScoreGrid(teamData.score || 0)}
+                </div>
+            </div>`;
+        }
+
+        function buildQuarterSummary() {
+            const qs = gameState.quarters;
+            const nameA = gameState.teamA.name || 'Team A';
+            const nameB = gameState.teamB.name || 'Team B';
+            const totA = (qs.q1.teamA||0)+(qs.q2.teamA||0)+(qs.q3.teamA||0)+(qs.q4.teamA||0);
+            const totB = (qs.q1.teamB||0)+(qs.q2.teamB||0)+(qs.q3.teamB||0)+(qs.q4.teamB||0);
+            return `
+            <table class="fiba-qsummary">
+                <thead>
+                    <tr>
+                        <th class="fiba-qs-team">TEAM</th>
+                        <th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th>
+                        <th>OT</th><th class="fiba-qs-total">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fiba-qs-team">${nameA}</td>
+                        <td>${qs.q1.teamA||0}</td><td>${qs.q2.teamA||0}</td>
+                        <td>${qs.q3.teamA||0}</td><td>${qs.q4.teamA||0}</td>
+                        <td></td>
+                        <td class="fiba-qs-total">${totA}</td>
+                    </tr>
+                    <tr>
+                        <td class="fiba-qs-team">${nameB}</td>
+                        <td>${qs.q1.teamB||0}</td><td>${qs.q2.teamB||0}</td>
+                        <td>${qs.q3.teamB||0}</td><td>${qs.q4.teamB||0}</td>
+                        <td></td>
+                        <td class="fiba-qs-total">${totB}</td>
+                    </tr>
+                </tbody>
+            </table>`;
+        }
+
+        function buildSignatures() {
+            return `
+            <div class="fiba-signatures">
+                <span class="fiba-sig-line">Scorer: _______________________________</span>
+                <span class="fiba-sig-line">Asst Scorer: __________________________</span>
+                <span class="fiba-sig-line">Commissioner: _________________________</span>
+            </div>`;
+        }
+
+        function generateFIBAScoresheet() {
+            const css = `
+            <style>
+                .fiba-page * {
+                    all: initial;
+                    box-sizing: border-box;
+                    font-family: Arial, Helvetica, sans-serif;
+                    color: #000;
+                    line-height: 1.2;
+                }
+                .fiba-page { display: block; width: 1122px; height: 794px; background: #fff; padding: 6px 8px; overflow: hidden; }
+                .fiba-header { display: flex; flex-direction: row; align-items: center; gap: 10px; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 4px; }
+                .fiba-title-block { min-width: 170px; }
+                .fiba-main-title { display: block; font-size: 13px; font-weight: bold; text-transform: uppercase; white-space: nowrap; }
+                .fiba-subtitle { display: block; font-size: 7px; color: #555; }
+                .fiba-info-fields { display: flex; flex-wrap: wrap; gap: 2px 14px; flex: 1; }
+                .fiba-field { display: inline; font-size: 7.5px; }
+                .fiba-field b { font-weight: bold; }
+                .fiba-ref-fields { display: flex; flex-direction: column; gap: 2px; white-space: nowrap; }
+                .fiba-body { display: flex; flex-direction: column; gap: 3px; }
+                .fiba-team-block { display: block; border: 1.5px solid #000; }
+                .fiba-team-title-bar { display: flex; align-items: center; background: #222; color: #fff; padding: 2px 6px; gap: 6px; }
+                .fiba-team-title-bar * { color: #fff; }
+                .fiba-team-label { font-size: 8px; font-weight: bold; background: #fff; color: #000 !important; padding: 1px 4px; border-radius: 2px; }
+                .fiba-team-name { font-size: 11px; font-weight: bold; flex: 1; }
+                .fiba-team-score { font-size: 16px; font-weight: bold; min-width: 36px; text-align: right; }
+                .fiba-team-body { display: flex; flex-direction: row; gap: 0; }
+                .fiba-roster-wrap { flex: 1; display: flex; flex-direction: column; }
+                .fiba-roster { width: 100%; border-collapse: collapse; font-size: 7.5px; }
+                .fiba-roster th, .fiba-roster td { border: 1px solid #999; padding: 1px 2px; text-align: center; height: 15px; }
+                .fiba-roster th { background: #e8e8e8; font-weight: bold; font-size: 7px; }
+                .fiba-cell-num { width: 22px; font-weight: bold; }
+                .fiba-cell-start { width: 16px; }
+                .fiba-cell-name { text-align: left !important; min-width: 110px; max-width: 150px; overflow: hidden; white-space: nowrap; }
+                .fiba-foul-cell { width: 17px; }
+                .fiba-foul-box { display: inline-flex; align-items: center; justify-content: center; width: 12px; height: 12px; border: 1px solid #000; font-size: 7px; font-weight: bold; }
+                .fiba-foul-filled { background: #000; color: #fff !important; }
+                .fiba-start-box { display: inline-block; width: 10px; height: 10px; border: 1px solid #000; }
+                .fiba-cell-pts { width: 26px; }
+                .fiba-cell-total { width: 30px; font-weight: bold; }
+                .fiba-player-out td { color: #aaa; }
+                .fiba-thead-row th { height: 14px; }
+                .fiba-blank-row td { color: transparent; }
+                .fiba-meta-bar { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 2px 4px; border-top: 1px solid #ccc; background: #f7f7f7; font-size: 7px; }
+                .fiba-meta-label { font-weight: bold; white-space: nowrap; }
+                .fiba-qfouls { display: flex; align-items: center; gap: 5px; }
+                .fiba-qf-item { display: inline; }
+                .fiba-qf-item b { font-weight: bold; }
+                .fiba-timeouts { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+                .fiba-timeout-box { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 1.5px solid #000; font-size: 8px; font-weight: bold; }
+                .fiba-timeout-used { background: #000; color: #fff !important; }
+                .fiba-score-grid-wrap { width: 280px; min-width: 280px; border-left: 1.5px solid #000; display: flex; flex-direction: column; padding: 2px; }
+                .fiba-score-grid-label { font-size: 7px; font-weight: bold; text-align: center; margin-bottom: 1px; }
+                .fiba-score-grid { display: grid; grid-template-columns: repeat(10, 1fr); border: 1px solid #000; flex: 1; }
+                .fiba-score-cell { border-right: 1px solid #bbb; border-bottom: 1px solid #bbb; text-align: center; font-size: 6px; display: flex; align-items: center; justify-content: center; height: 22px; }
+                .fiba-score-cell:nth-child(10n) { border-right: none; }
+                .fiba-score-cell:nth-last-child(-n+10) { border-bottom: none; }
+                .fiba-score-crossed { background: #222; color: #fff !important; font-weight: bold; }
+                .fiba-score-overnote { font-size: 7px; text-align: center; font-weight: bold; margin-top: 1px; }
+                .fiba-qsummary { width: 100%; border-collapse: collapse; font-size: 8px; margin-top: 3px; }
+                .fiba-qsummary th, .fiba-qsummary td { border: 1px solid #000; text-align: center; padding: 2px 4px; height: 16px; }
+                .fiba-qsummary th { background: #e0e0e0; font-weight: bold; }
+                .fiba-qs-team { text-align: left !important; min-width: 100px; font-weight: bold; }
+                .fiba-qs-total { font-weight: bold; background: #f0f0f0; }
+                .fiba-signatures { display: flex; gap: 20px; font-size: 7.5px; padding: 4px 6px; border-top: 1px solid #000; margin-top: 3px; }
+                .fiba-sig-line { display: inline; white-space: nowrap; }
+            </style>`;
+
+            const html = `
+            ${css}
+            <div class="fiba-page">
+                ${buildFIBAHeader()}
+                <div class="fiba-body">
+                    ${buildTeamBlock(gameState.teamA, 'Team A')}
+                    ${buildTeamBlock(gameState.teamB, 'Team B')}
+                </div>
+                ${buildQuarterSummary()}
+                ${buildSignatures()}
+            </div>`;
+
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1122px;height:794px;overflow:hidden;background:#fff;z-index:-1;';
+            wrapper.innerHTML = html;
+            document.body.appendChild(wrapper);
+            return wrapper;
+        }
+
+        // ─── End FIBA Generation ────────────────────────────────────────────────────
+
         async function exportPDF() {
-            showMessage('Generating PDF... Please wait...');
+            showMessage('Generating FIBA PDF... Please wait...');
+            let fibaDiv = null;
             try {
-                const element = document.getElementById('scoresheet');
-                const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true });
+                fibaDiv = generateFIBAScoresheet();
+                const canvas = await html2canvas(fibaDiv.querySelector('.fiba-page'), {
+                    scale: 2,
+                    logging: false,
+                    useCORS: true,
+                    width: 1122,
+                    height: 794,
+                    backgroundColor: '#ffffff'
+                });
                 const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                pdf.save(`scoresheet_${gameState.gameInfo.date || 'game'}.pdf`);
-                showMessage('PDF exported successfully!');
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+                pdf.save(`fiba_scoresheet_${gameState.gameInfo.date || 'game'}.pdf`);
+                showMessage('FIBA PDF exported successfully!');
             } catch (error) {
                 alert('Error exporting PDF: ' + error.message);
+            } finally {
+                if (fibaDiv) fibaDiv.remove();
             }
         }
 
